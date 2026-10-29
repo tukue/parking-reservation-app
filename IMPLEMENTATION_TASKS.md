@@ -26,14 +26,18 @@ Use these tasks to divide implementation into small, reviewable pieces. Each tas
 
 ## 3. Data storage
 
-**Suggested owner:** one teammate. **Depends on:** service interfaces and team decision on storage.
+**Suggested owner:** one teammate. **Depends on:** domain model.
 
-- [ ] Agree whether the first version uses in-memory storage or a database.
-- [ ] Define repository interfaces for people, spaces, and reservations.
-- [ ] Implement the selected storage adapter without placing storage logic in domain classes.
-- [ ] Ensure reservation IDs are unique and active reservations can be retrieved.
+For this learning challenge, use **in-memory storage only** in the first version. Do not add a database or storage dependency. Data is available while the application is running and is cleared when it stops; database persistence can be added later as a separate extension.
 
-**Tests at this level:** repository tests for saving, looking up, and retrieving reservations and spaces. If a database is selected, run integration tests against the configured test database.
+- [ ] Define small repository interfaces for the data the service needs, such as saving and finding people and reservations.
+- [ ] Implement in-memory repositories using Java collections, for example a `Map<UUID, Reservation>` keyed by reservation ID.
+- [ ] Keep the `ParkingArea` instance and its 20 `ParkingSpace` objects in one shared application-scoped instance; do not recreate the area for every request.
+- [ ] Create repository instances once at startup and pass those same instances to the service.
+- [ ] Keep storage operations out of the model classes and user interface.
+- [ ] Ensure reservations can be found by ID and active reservations can be listed.
+
+**Tests at this level:** repository unit tests for saving, finding, listing, and updating data. Verify that multiple operations using the same repository instance see the same in-memory data, and that the fixed parking area starts with 20 spaces. Do not write database integration tests for this version.
 
 ## 4. User interaction
 
