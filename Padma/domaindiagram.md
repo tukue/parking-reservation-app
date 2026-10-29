@@ -28,3 +28,4 @@ classDiagram
     ParkingLot "1" *-- "20" ParkingSpace : contains
     Person "1" --> "0..*" Reservation : makes
     Reservation "0..*" --> "1" ParkingSpace : reserves
+```

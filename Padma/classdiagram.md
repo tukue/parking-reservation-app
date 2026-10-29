@@ -41,9 +41,9 @@ classDiagram
         +main(String[] args)
     }
 
-    ParkingLot "1" o-- "20" ParkingSpace : manages
-    ParkingLot "1" o-- "0..*" Reservation : tracks
+    ParkingLot "1" *-- "20" ParkingSpace : contains
+    ParkingLot "1" --> "0..*" Reservation : tracks
     Reservation "*" --> "1" Person : belongs to
     Reservation "*" --> "1" ParkingSpace : reserves
     Main ..> ParkingLot : uses
-    ```
+```
