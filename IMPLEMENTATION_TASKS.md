@@ -30,14 +30,14 @@ Use these tasks to divide implementation into small, reviewable pieces. Each tas
 
 For this learning challenge, use **in-memory storage only** in the first version. Do not add a database or storage dependency. Data is available while the application is running and is cleared when it stops; database persistence can be added later as a separate extension.
 
-- [ ] Define small repository interfaces for the data the service needs, such as saving and finding people and reservations.
-- [ ] Implement in-memory repositories using Java collections, for example a `Map<UUID, Reservation>` keyed by reservation ID.
-- [ ] Keep the `ParkingArea` instance and its 20 `ParkingSpace` objects in one shared application-scoped instance; do not recreate the area for every request.
-- [ ] Create repository instances once at startup and pass those same instances to the service.
-- [ ] Keep storage operations out of the model classes and user interface.
-- [ ] Ensure reservations can be found by ID and active reservations can be listed.
+- [x] **Done** — Define repository interfaces for saving/finding people and saving/finding/listing reservations.
+- [x] **Done** — Implement in-memory repositories using Java collections, with reservations keyed by UUID.
+- [x] **Done** — Keep the `ParkingArea` instance and its 20 `ParkingSpace` objects in one shared `InMemoryParkingStore`.
+- [x] **Done** — Create repository instances once in `InMemoryParkingStore`; the service task can receive these shared interfaces.
+- [x] **Done** — Keep storage operations out of the model classes and user interface.
+- [x] **Done** — Ensure reservations can be found by ID and active reservations can be listed.
 
-**Tests at this level:** repository unit tests for saving, finding, listing, and updating data. Verify that multiple operations using the same repository instance see the same in-memory data, and that the fixed parking area starts with 20 spaces. Do not write database integration tests for this version.
+**Tests at this level:** repository unit tests cover saving, finding, listing, and updating data. They verify that the shared repository instance retains data and that the parking area starts with 20 spaces. No database integration tests are needed for this version.
 
 ## 4. User interaction
 
