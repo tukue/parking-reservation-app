@@ -5,8 +5,6 @@
 **Status:** Individual proposal — for discussion with the other five team members  
 **Scope:** Challenge 1 (Domain Model) and Challenge 2 (UML Class Diagram)
 
-> **Team approach:** We agreed that all six members will independently prepare a domain model and a UML class diagram. We will then present our ideas, compare the models, discuss differences, and agree on one shared design before writing code. This file contains **my proposal**, not the team's final decision.
-
 ---
 
 ## 1. Understanding the Scenario
@@ -219,5 +217,5 @@ I am open to revising this model after hearing the other five members' reasoning
 
 ### Reference material
 
-- `OOP_Workshop_ParkingApp(1).md` — scenario and workshop challenges.
-- `OOP_Domain_Modeling_Guide(1).md` — domain modeling approach and transition to UML.
+- `OOP_Workshop_ParkingApp.md` — scenario and workshop challenges.
+- `OOP_Domain_Modeling_Guide.md` — domain modeling approach and transition to UML.
