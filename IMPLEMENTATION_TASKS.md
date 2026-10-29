@@ -17,10 +17,10 @@ Use these tasks to divide implementation into small, reviewable pieces. Each tas
 
 **Suggested owner:** one teammate. **Depends on:** domain model.
 
-- [ ] Create a `ReservationService` to reserve an available space and complete an active reservation.
-- [ ] Prevent reserving an occupied space or completing an already-completed reservation.
-- [ ] Provide queries for all spaces and currently available spaces.
-- [ ] Keep reservation creation/completion rules in the service rather than the UI.
+- [x] Create a `ReservationService` to reserve an available space and complete an active reservation.
+- [x] Prevent reserving an occupied space or completing an already-completed reservation.
+- [x] Provide queries for all spaces and currently available spaces.
+- [x] Keep reservation creation/completion rules in the service rather than the UI.
 
 **Tests at this level:** service unit tests using the in-memory model. Cover successful reservation/completion, occupied-space rejection, invalid person/vehicle ownership, and availability before and after completion.
 
