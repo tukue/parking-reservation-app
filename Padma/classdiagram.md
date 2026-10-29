@@ -46,4 +46,4 @@ classDiagram
     Reservation "*" --> "1" Person : belongs to
     Reservation "*" --> "1" ParkingSpace : reserves
     Main ..> ParkingLot : uses
-```
+    ```
