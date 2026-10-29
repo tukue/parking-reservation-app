@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,6 +52,18 @@ class ParkingControllerTest {
                 .andExpect(model().attribute("spaces", List.of(space)))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Parking spaces")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Make a reservation")));
+    }
+
+    @Test
+    void homeRendersWhenThereAreNoSpaces() throws Exception {
+        when(reservationService.getAllSpaces()).thenReturn(List.of());
+        when(reservationService.getAvailableSpaces()).thenReturn(List.of());
+        when(reservationService.getActiveReservations()).thenReturn(List.of());
+
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("availabilityPercent", 0.0))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("0 spaces available")));
     }
 
     @Test
@@ -98,6 +111,33 @@ class ParkingControllerTest {
                         .param("durationHours", "1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Parking space 1 is already occupied"));
+    }
+
+    @Test
+    void missingSpaceSelectionReturnsUserFacingErrorInsteadOfBadRequest() throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", "Alex Example")
+                        .param("phoneNumber", "+46123456789")
+                        .param("registrationNumber", "ABC123")
+                        .param("durationHours", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Please choose an available parking space"));
+
+        verifyNoInteractions(reservationService);
+    }
+
+    @Test
+    void blankSpaceSelectionReturnsUserFacingError() throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", "Alex Example")
+                        .param("phoneNumber", "+46123456789")
+                        .param("registrationNumber", "ABC123")
+                        .param("spaceId", " ")
+                        .param("durationHours", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Please choose an available parking space"));
+
+        verifyNoInteractions(reservationService);
     }
 
     @Test

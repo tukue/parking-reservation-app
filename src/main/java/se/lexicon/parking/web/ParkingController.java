@@ -27,8 +27,15 @@ public class ParkingController {
 
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("spaces", reservationService.getAllSpaces());
-        model.addAttribute("availableSpaces", reservationService.getAvailableSpaces());
+        var spaces = reservationService.getAllSpaces();
+        var availableSpaces = reservationService.getAvailableSpaces();
+        double availabilityPercent = spaces.isEmpty()
+                ? 0.0
+                : availableSpaces.size() * 100.0 / spaces.size();
+
+        model.addAttribute("spaces", spaces);
+        model.addAttribute("availableSpaces", availableSpaces);
+        model.addAttribute("availabilityPercent", availabilityPercent);
         model.addAttribute("activeReservations", reservationService.getActiveReservations());
         return "index";
     }
@@ -38,10 +45,13 @@ public class ParkingController {
             @RequestParam String name,
             @RequestParam String phoneNumber,
             @RequestParam String registrationNumber,
-            @RequestParam String spaceId,
+            @RequestParam(required = false) String spaceId,
             @RequestParam int durationHours,
             RedirectAttributes redirectAttributes) {
         try {
+            if (spaceId == null || spaceId.isBlank()) {
+                throw new IllegalArgumentException("Please choose an available parking space");
+            }
             if (durationHours <= 0) {
                 throw new IllegalArgumentException("Parking duration must be at least one hour");
             }
