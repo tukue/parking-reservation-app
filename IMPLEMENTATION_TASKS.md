@@ -4,11 +4,11 @@ Use these tasks to divide implementation into small, reviewable pieces. Each tas
 
 ## 1. Domain model
 
-- [x] Add `Person`, `Vehicle`, `ParkingArea`, `ParkingSpace`, and `Reservation` model classes.
-- [x] Add `SpaceStatus` and `ReservationStatus` enums.
-- [x] Validate model inputs, reservation ownership, and reservation duration.
-- [x] Add equality and hash-code behavior for `Person`.
-- [x] Test person equality and accepting an equivalent owner instance.
+- [x] **Done** — Add `Person`, `Vehicle`, `ParkingArea`, `ParkingSpace`, and `Reservation` model classes.
+- [x] **Done** — Add `SpaceStatus` and `ReservationStatus` enums.
+- [x] **Done** — Validate model inputs, reservation ownership, and reservation duration.
+- [x] **Done** — Add equality and hash-code behavior for `Person`.
+- [x] **Done** — Test person equality and accepting an equivalent owner instance.
 - [ ] Add model tests for invalid construction, reservation completion, duplicate completion, and space availability transitions.
 
 **Tests at this level:** unit tests for valid construction, invalid/null/blank input, expected end-time calculation, active/completed state, and space availability transitions.
