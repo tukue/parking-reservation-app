@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lexicon Parking</title>
+    <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-content">
+        <p class="eyebrow">LEXICON VÄXJÖ</p>
+        <h1>Parking, made simple.</h1>
+        <p>Check space availability and reserve a spot for your visit.</p>
+    </div>
+</header>
+
+<main class="page-content">
+    <div th:if="${successMessage}" class="notice success" role="status" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+
+    <section class="summary-card" aria-label="Parking availability">
+        <div>
+            <p class="eyebrow">RIGHT NOW</p>
+            <h2><span th:text="${availableSpaces.size()}">20</span> spaces available</h2>
+            <p class="muted">of <span th:text="${spaces.size()}">20</span> total spaces</p>
+        </div>
+        <div class="availability-meter" aria-hidden="true">
+            <span th:style="|width: ${availableSpaces.size() * 100 / spaces.size()}%|" class="meter-fill"></span>
+        </div>
+    </section>
+
+    <div class="content-grid">
+        <section class="panel" aria-labelledby="spaces-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">LIVE AVAILABILITY</p>
+                    <h2 id="spaces-heading">Parking spaces</h2>
+                </div>
+                <span class="legend"><i class="dot available-dot"></i>Available <i class="dot occupied-dot"></i>Occupied</span>
+            </div>
+            <div class="space-grid">
+                <div th:each="space : ${spaces}"
+                     class="space-tile"
+                     th:classappend="${space.status.name() == 'AVAILABLE'} ? ' space-available' : ' space-occupied'">
+                    <span class="space-number" th:text="${space.spaceId}">1</span>
+                    <span class="space-status" th:text="${space.status.name() == 'AVAILABLE'} ? 'Available' : 'Occupied'">Available</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel booking-panel" aria-labelledby="booking-heading">
+            <p class="eyebrow">BOOK A SPACE</p>
+            <h2 id="booking-heading">Make a reservation</h2>
+            <form method="post" th:action="@{/reservations}" class="booking-form">
+                <label for="name">Full name</label>
+                <input id="name" name="name" autocomplete="name" required maxlength="100" placeholder="Your name">
+
+                <label for="phoneNumber">Phone number</label>
+                <input id="phoneNumber" name="phoneNumber" type="tel" autocomplete="tel" required maxlength="30" placeholder="Your phone number">
+
+                <label for="registrationNumber">Vehicle registration</label>
+                <input id="registrationNumber" name="registrationNumber" required maxlength="20" placeholder="ABC 123">
+
+                <div class="form-row">
+                    <div>
+                        <label for="spaceId">Available space</label>
+                        <select id="spaceId" name="spaceId" required th:disabled="${availableSpaces.isEmpty()}">
+                            <option value="" selected disabled>Select a space</option>
+                            <option th:each="space : ${availableSpaces}" th:value="${space.spaceId}"
+                                    th:text="|Space ${space.spaceId}|">Space 1</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="durationHours">Duration (hours)</label>
+                        <input id="durationHours" name="durationHours" type="number" min="1" step="1" value="1" required>
+                    </div>
+                </div>
+                <button type="submit" class="primary-button" th:disabled="${availableSpaces.isEmpty()}">Reserve parking</button>
+                <p th:if="${availableSpaces.isEmpty()}" class="muted">All spaces are currently occupied.</p>
+            </form>
+        </section>
+    </div>
+
+    <section class="panel reservations-panel" aria-labelledby="reservations-heading">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">ACTIVE BOOKINGS</p>
+                <h2 id="reservations-heading">Current reservations</h2>
+            </div>
+        </div>
+        <div th:if="${activeReservations.isEmpty()}" class="empty-state">There are no active reservations.</div>
+        <div th:unless="${activeReservations.isEmpty()}" class="table-wrap">
+            <table>
+                <thead>
+                <tr><th>Space</th><th>Vehicle</th><th>Reservation</th><th>Expected end</th><th></th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="reservation : ${activeReservations}">
+                    <td th:text="${reservation.parkingSpace.spaceId}">1</td>
+                    <td th:text="${reservation.vehicle.registrationNumber}">ABC123</td>
+                    <td class="reservation-id" th:text="${reservation.reservationId}">id</td>
+                    <td th:text="${reservation.expectedEndTime}">2026-10-29T12:00</td>
+                    <td>
+                        <form method="post" th:action="@{/reservations/{id}/complete(id=${reservation.reservationId})}">
+                            <button type="submit" class="secondary-button">Complete</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<footer>Lexicon Parking · Växjö</footer>
+</body>
+</html>

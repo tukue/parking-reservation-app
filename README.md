@@ -21,6 +21,8 @@ mvn clean verify
 mvn exec:java
 ```
 
+Then open [http://localhost:8080](http://localhost:8080) in a browser.
+
 ## Storage approach
 
 For this learning project, data storage will initially use in-memory Java collections rather than a database. Keep shared repository instances alive for the duration of the application so reservations and parking-space availability stay consistent while it is running. Data is cleared when the application stops. Database persistence can be added later as a separate learning step.
@@ -29,8 +31,11 @@ For this learning project, data storage will initially use in-memory Java collec
 
 ```text
 src/
-├── main/java/se/lexicon/parking/  # Application source
-└── test/java/se/lexicon/parking/  # JUnit tests
+├── main/java/se/lexicon/parking/  # Application, service, model, storage, and web controller
+├── main/resources/
+│   ├── templates/                 # Thymeleaf pages
+│   └── static/                    # CSS and other static assets
+└── test/java/se/lexicon/parking/  # Unit and MVC tests
 ```
 
 Domain concepts are documented in [DOMAIN_CONCEPTS.md](DOMAIN_CONCEPTS.md), with the main class model in [UML_CLASS_DIAGRAM.md](UML_CLASS_DIAGRAM.md).

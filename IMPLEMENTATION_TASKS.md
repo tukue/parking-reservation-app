@@ -40,23 +40,23 @@ For this learning challenge, the repository interfaces are the storage abstracti
 
 **Tests at this level:** `InMemoryPersonRepositoryTest`, `InMemoryReservationRepositoryTest`, and `InMemoryParkingStoreTest` cover saving, finding, listing, active-reservation updates, shared repository state, and the 20-space area. No database integration tests are needed for this version.
 
-## 4. User interaction
+## 4. User interface (UI) — completed
 
-**Suggested owner:** one teammate. **Depends on:** reservation service.
+**Depends on:** reservation service. Implemented as a Spring Boot MVC application with Thymeleaf templates.
 
-- [ ] Agree on the initial interface (for example, a console menu or a web API) before implementation.
-- [ ] Support registering a person and vehicle.
-- [ ] Display spaces and their availability.
-- [ ] Allow a person to reserve an available space for a duration and complete the reservation when leaving.
-- [ ] Show useful validation and error messages.
+- [x] **Done** — Display all parking spaces and current availability.
+- [x] **Done** — Provide a reservation form for person, vehicle, available space, and duration; register the person during booking.
+- [x] **Done** — Show the reservation ID and expected end time after booking.
+- [x] **Done** — Allow a reservation to be completed and refresh the space availability.
+- [x] **Done** — Show validation and reservation errors in the UI.
 
-**Tests at this level:** interface or controller tests for inputs, outputs, successful actions, and user-visible errors. Keep business-rule tests in the service layer.
+**Tests at this level:** `ParkingControllerTest` covers the availability page, successful reservation and completion submissions, and user-visible reservation errors. Business rules remain covered by service tests.
 
 ## 5. End-to-end integration and release readiness
 
 **Suggested owner:** shared integration task. **Depends on:** service, storage, and interface tasks.
 
-- [ ] Wire the application entry point to the selected interface, service, and storage implementation.
+- [x] **Done** — Wire the Spring Boot entry point to the UI, service, and shared in-memory storage.
 - [ ] Verify the full flow: register → view spaces → reserve → view occupied space → complete reservation → view available space.
 - [ ] Update the README with setup, run, and test instructions.
 - [ ] Review the UML and domain notes against the implemented behavior.
