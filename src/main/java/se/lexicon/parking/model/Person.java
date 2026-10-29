@@ -19,6 +19,22 @@ public class Person {
         return phoneNumber;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (!(object instanceof Person person)) {
+            return false;
+        }
+        return name.equals(person.name) && phoneNumber.equals(person.phoneNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, phoneNumber);
+    }
+
     static String requireText(String value, String fieldName) {
         Objects.requireNonNull(value, fieldName + " must not be null");
         if (value.isBlank()) {

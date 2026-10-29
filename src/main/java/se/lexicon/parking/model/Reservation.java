@@ -24,7 +24,7 @@ public class Reservation {
                        Duration plannedDuration, LocalDateTime startTime) {
         this.person = Objects.requireNonNull(person, "person must not be null");
         this.vehicle = Objects.requireNonNull(vehicle, "vehicle must not be null");
-        if (vehicle.getOwner() != person) {
+        if (!vehicle.getOwner().equals(person)) {
             throw new IllegalArgumentException("Vehicle must belong to the reserving person");
         }
         this.parkingSpace = Objects.requireNonNull(parkingSpace, "parkingSpace must not be null");
