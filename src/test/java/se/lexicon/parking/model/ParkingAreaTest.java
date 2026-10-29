@@ -1,6 +1,7 @@
 package se.lexicon.parking.model;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,10 +19,12 @@ class ParkingAreaTest {
         assertEquals(ParkingArea.SPACE_COUNT, parkingArea.getAvailableSpaces().size());
 
         ParkingSpace selectedSpace = parkingArea.getSpaces().getFirst();
-        Reservation reservation = new Reservation(person, vehicle, selectedSpace, Duration.ofHours(1));
+        LocalDateTime startTime = LocalDateTime.of(2026, 10, 29, 10, 0);
+        Reservation reservation = new Reservation(
+                person, vehicle, selectedSpace, Duration.ofHours(1), startTime);
 
         assertEquals(ParkingArea.SPACE_COUNT - 1, parkingArea.getAvailableSpaces().size());
-        reservation.complete();
+        reservation.complete(startTime.plusMinutes(30));
         assertEquals(ParkingArea.SPACE_COUNT, parkingArea.getAvailableSpaces().size());
     }
 
