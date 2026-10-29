@@ -30,3 +30,56 @@ src/
 ```
 
 Domain concepts are documented in [DOMAIN_CONCEPTS.md](DOMAIN_CONCEPTS.md), with the class model in [UML_CLASS_DIAGRAM.md](UML_CLASS_DIAGRAM.md).
+
+## Class diagram
+
+```mermaid
+classDiagram
+    class ParkingArea {
+        +String name
+        +int capacity
+    }
+
+    class ParkingSpace {
+        +String spaceId
+        +SpaceStatus status
+    }
+
+    class Person {
+        +String name
+        +String phoneNumber
+    }
+
+    class Vehicle {
+        +String registrationNumber
+    }
+
+    class Reservation {
+        +UUID reservationId
+        +LocalDateTime startTime
+        +Duration plannedDuration
+        +LocalDateTime expectedEndTime
+        +LocalDateTime actualEndTime
+        +ReservationStatus status
+    }
+
+    class SpaceStatus {
+        <<enumeration>>
+        AVAILABLE
+        OCCUPIED
+    }
+
+    class ReservationStatus {
+        <<enumeration>>
+        ACTIVE
+        COMPLETED
+    }
+
+    ParkingArea "1" *-- "20" ParkingSpace : contains
+    Person "1" -- "0..*" Vehicle : owns
+    Person "1" -- "0..*" Reservation : makes
+    Vehicle "1" -- "0..*" Reservation : is used for
+    ParkingSpace "1" -- "0..*" Reservation : is reserved in
+    ParkingSpace ..> SpaceStatus : has
+    Reservation ..> ReservationStatus : has
+```
