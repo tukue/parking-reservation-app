@@ -13,31 +13,32 @@ Use these tasks to divide implementation into small, reviewable pieces. Each tas
 
 **Tests at this level:** unit tests for valid construction, invalid/null/blank input, expected end-time calculation, active/completed state, and space availability transitions.
 
-## 2. Reservation use cases
+## 2. Reservation use cases — completed
 
-**Suggested owner:** one teammate. **Depends on:** domain model.
+**Depends on:** domain model and the repository interfaces from Task 3.
 
-- [x] Create a `ReservationService` to reserve an available space and complete an active reservation.
-- [x] Prevent reserving an occupied space or completing an already-completed reservation.
-- [x] Provide queries for all spaces and currently available spaces.
-- [x] Keep reservation creation/completion rules in the service rather than the UI.
+- [x] **Done** — Implement `createReservation(Person, Vehicle, ParkingSpace, Duration)` and `completeReservation(UUID)` use cases.
+- [x] **Done** — Reject occupied or foreign parking spaces, unregistered people, mismatched vehicle owners, and already-completed reservations.
+- [x] **Done** — Provide `getAllSpaces`, `getAvailableSpaces`, `getAllReservations`, and `getActiveReservations` queries.
+- [x] **Done** — Keep use-case rules in the service and save completed reservations through the repository interface.
 
-**Tests at this level:** service unit tests using the in-memory model. Cover successful reservation/completion, occupied-space rejection, invalid person/vehicle ownership, and availability before and after completion.
+**Tests at this level:** `ReservationServiceTest` covers successful reservation/completion, occupied and foreign-space rejection, unregistered people, mismatched vehicle ownership, duplicate/unknown reservations, and availability before and after completion.
 
 ## 3. Data storage
 
 **Suggested owner:** one teammate. **Depends on:** domain model.
 
-For this learning challenge, use **in-memory storage only** in the first version. Do not add a database or storage dependency. Data is available while the application is running and is cleared when it stops; database persistence can be added later as a separate extension.
+For this learning challenge, the repository interfaces are the storage abstraction. Use **in-memory storage only** in the first version. Do not add a database, database-specific abstractions, or storage dependencies. Data is available while the application is running and is cleared when it stops; database persistence can be added later as a separate extension.
 
-- [x] **Done** — Define repository interfaces for saving/finding people and saving/finding/listing reservations.
-- [x] **Done** — Implement in-memory repositories using Java collections, with reservations keyed by UUID.
+- [x] **Done** — Define `PersonRepository` (`save`, `findByPhoneNumber`, `findAll`) and `ReservationRepository` (`save`, `findById`, `findAll`, `findActive`).
+- [x] **Done** — Implement `InMemoryPersonRepository` and `InMemoryReservationRepository` with Java collections; reservations are keyed by UUID.
 - [x] **Done** — Keep the `ParkingArea` instance and its 20 `ParkingSpace` objects in one shared `InMemoryParkingStore`.
-- [x] **Done** — Create repository instances once in `InMemoryParkingStore`; the service task can receive these shared interfaces.
+- [x] **Done** — Create each repository once in `InMemoryParkingStore` and expose it through its interface for Task 2's service to use.
 - [x] **Done** — Keep storage operations out of the model classes and user interface.
 - [x] **Done** — Ensure reservations can be found by ID and active reservations can be listed.
+- [x] **Done** — Keep the storage abstraction limited to the repository interfaces needed by the current use cases.
 
-**Tests at this level:** repository unit tests cover saving, finding, listing, and updating data. They verify that the shared repository instance retains data and that the parking area starts with 20 spaces. No database integration tests are needed for this version.
+**Tests at this level:** `InMemoryPersonRepositoryTest`, `InMemoryReservationRepositoryTest`, and `InMemoryParkingStoreTest` cover saving, finding, listing, active-reservation updates, shared repository state, and the 20-space area. No database integration tests are needed for this version.
 
 ## 4. User interaction
 
