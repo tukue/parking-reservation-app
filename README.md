@@ -29,7 +29,11 @@ src/
 └── test/java/se/lexicon/parking/  # JUnit tests
 ```
 
-Domain concepts are documented in [DOMAIN_CONCEPTS.md](DOMAIN_CONCEPTS.md), with the class model in [UML_CLASS_DIAGRAM.md](UML_CLASS_DIAGRAM.md).
+Domain concepts are documented in [DOMAIN_CONCEPTS.md](DOMAIN_CONCEPTS.md), with the main class model in [UML_CLASS_DIAGRAM.md](UML_CLASS_DIAGRAM.md).
+
+## Learning resource
+
+The simplified three-class UML diagram is kept separate as a [learning model](docs/learning/SIMPLIFIED_UML_CLASS_DIAGRAM.md).
 
 ## Class diagram
 
