@@ -112,7 +112,8 @@ public class ReservationService {
 
         if (reservation.getStatus() != ReservationStatus.ACTIVE) {
             throw new IllegalStateException(
-                    "Reservation is already completed");
+                    "Reservation is not active (current status: "
+                            + reservation.getStatus() + ")");
         }
 
         reservation.complete(actualEndTime);
