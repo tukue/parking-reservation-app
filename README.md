@@ -29,4 +29,4 @@ src/
 └── test/java/se/lexicon/parking/  # JUnit tests
 ```
 
-Domain concepts are documented in [DOMAIN_CONCEPTS.md](DOMAIN_CONCEPTS.md).
+Domain concepts are documented in [DOMAIN_CONCEPTS.md](DOMAIN_CONCEPTS.md), with the class model in [UML_CLASS_DIAGRAM.md](UML_CLASS_DIAGRAM.md).
