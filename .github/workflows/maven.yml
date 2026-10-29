@@ -15,5 +15,14 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
-      - name: Build and test
-        run: mvn --batch-mode clean verify
+      - name: Run all tests
+        run: mvn --batch-mode clean test
+      - name: Verify package build
+        run: mvn --batch-mode package -DskipTests
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+          if-no-files-found: ignore

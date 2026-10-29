@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import se.lexicon.parking.model.ParkingArea;
@@ -36,6 +37,19 @@ public class ReservationService {
 
         this.reservationRepository = Objects.requireNonNull(
                 reservationRepository, "reservationRepository must not be null");
+    }
+
+    public Person registerPerson(Person person) {
+        Objects.requireNonNull(person, "person must not be null");
+        Optional<Person> existingPerson = personRepository.findByPhoneNumber(person.getPhoneNumber());
+        if (existingPerson.isPresent()) {
+            if (!existingPerson.get().equals(person)) {
+                throw new IllegalArgumentException("Phone number is already registered to another person");
+            }
+            return existingPerson.get();
+        }
+        personRepository.save(person);
+        return person;
     }
 
     // Create a reservation for a registered person and their vehicle.

@@ -1,8 +1,11 @@
 package se.lexicon.parking;
 
-/** Entry point for the parking application. */
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
 public class App {
     public static void main(String[] args) {
-        System.out.println("Lexicon Parking App");
+        SpringApplication.run(App.class, args);
     }
 }
