@@ -9,7 +9,7 @@ Use these tasks to divide implementation into small, reviewable pieces. Each tas
 - [x] **Done** — Validate model inputs, reservation ownership, and reservation duration.
 - [x] **Done** — Add equality and hash-code behavior for `Person`.
 - [x] **Done** — Test person equality and accepting an equivalent owner instance.
-- [ ] Add model tests for invalid construction, reservation completion, duplicate completion, and space availability transitions.
+- [x] **Done** — Add model tests for invalid construction, reservation completion, duplicate completion, and space availability transitions.
 
 **Tests at this level:** unit tests for valid construction, invalid/null/blank input, expected end-time calculation, active/completed state, and space availability transitions.
 

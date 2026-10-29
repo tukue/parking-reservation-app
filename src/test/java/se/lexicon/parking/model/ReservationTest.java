@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ReservationTest {
     @Test
@@ -22,5 +23,51 @@ class ReservationTest {
         assertEquals(reservingPerson, reservation.getPerson());
         assertEquals(SpaceStatus.OCCUPIED, parkingSpace.getStatus());
         assertEquals(startTime.plusHours(2), reservation.getExpectedEndTime());
+    }
+
+    @Test
+    void rejectsInvalidDurationWithoutOccupyingSpace() {
+        Person person = new Person("Alex Example", "+46123456789");
+        Vehicle vehicle = new Vehicle("ABC123", person);
+        ParkingSpace parkingSpace = new ParkingSpace("1");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new Reservation(person, vehicle, parkingSpace, Duration.ZERO));
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+    }
+
+    @Test
+    void completingReservationRecordsEndTimeAndReleasesSpace() {
+        Person person = new Person("Alex Example", "+46123456789");
+        Vehicle vehicle = new Vehicle("ABC123", person);
+        ParkingSpace parkingSpace = new ParkingSpace("1");
+        LocalDateTime startTime = LocalDateTime.of(2026, 10, 29, 10, 0);
+        LocalDateTime actualEndTime = startTime.plusMinutes(45);
+        Reservation reservation = new Reservation(
+                person, vehicle, parkingSpace, Duration.ofHours(2), startTime);
+
+        reservation.complete(actualEndTime);
+
+        assertEquals(ReservationStatus.COMPLETED, reservation.getStatus());
+        assertEquals(actualEndTime, reservation.getActualEndTime());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+    }
+
+    @Test
+    void cannotCompleteReservationMoreThanOnce() {
+        Person person = new Person("Alex Example", "+46123456789");
+        Vehicle vehicle = new Vehicle("ABC123", person);
+        ParkingSpace parkingSpace = new ParkingSpace("1");
+        LocalDateTime startTime = LocalDateTime.of(2026, 10, 29, 10, 0);
+        Reservation reservation = new Reservation(
+                person, vehicle, parkingSpace, Duration.ofHours(2), startTime);
+        LocalDateTime firstEndTime = startTime.plusMinutes(45);
+
+        reservation.complete(firstEndTime);
+
+        assertThrows(IllegalStateException.class,
+                () -> reservation.complete(firstEndTime.plusMinutes(15)));
+        assertEquals(firstEndTime, reservation.getActualEndTime());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
     }
 }
