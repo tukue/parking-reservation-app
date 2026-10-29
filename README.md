@@ -21,6 +21,10 @@ mvn clean verify
 mvn exec:java
 ```
 
+## Storage approach
+
+For this learning project, data storage will initially use in-memory Java collections rather than a database. Keep shared repository instances alive for the duration of the application so reservations and parking-space availability stay consistent while it is running. Data is cleared when the application stops. Database persistence can be added later as a separate learning step.
+
 ## Project structure
 
 ```text
