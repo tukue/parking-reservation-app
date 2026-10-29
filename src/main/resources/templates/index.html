@@ -42,9 +42,9 @@
             <div class="space-grid">
                 <div th:each="space : ${spaces}"
                      class="space-tile"
-                     th:classappend="${space.status.name() == 'AVAILABLE'} ? ' space-available' : ' space-occupied'">
+                     th:classappend="${space.status.name() == 'AVAILABLE' ? ' space-available' : ' space-occupied'}">
                     <span class="space-number" th:text="${space.spaceId}">1</span>
-                    <span class="space-status" th:text="${space.status.name() == 'AVAILABLE'} ? 'Available' : 'Occupied'">Available</span>
+                    <span class="space-status" th:text="${space.status.name() == 'AVAILABLE' ? 'Available' : 'Occupied'}">Available</span>
                 </div>
             </div>
         </section>

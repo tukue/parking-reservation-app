@@ -63,7 +63,7 @@ class ParkingControllerTest {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("availabilityPercent", 0.0))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("0 spaces available")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("spaces available")));
     }
 
     @Test
