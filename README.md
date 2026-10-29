@@ -30,6 +30,7 @@ src/
 ```
 
 Domain concepts are documented in [DOMAIN_CONCEPTS.md](DOMAIN_CONCEPTS.md), with the main class model in [UML_CLASS_DIAGRAM.md](UML_CLASS_DIAGRAM.md).
+The team task breakdown is in [IMPLEMENTATION_TASKS.md](IMPLEMENTATION_TASKS.md).
 
 ## Learning resource
 
