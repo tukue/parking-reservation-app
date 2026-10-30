@@ -17,12 +17,12 @@ Use these tasks to divide implementation into small, reviewable pieces. Each tas
 
 **Depends on:** domain model and the repository interfaces from Task 3.
 
-- [x] **Done** — Implement `createReservation(Person, Vehicle, ParkingSpace, Duration)` and `completeReservation(UUID)` use cases.
-- [x] **Done** — Reject occupied or foreign parking spaces, unregistered people, mismatched vehicle owners, and already-completed reservations.
+- [x] **Done** — Implement `createReservation(Person, Vehicle, ParkingSpace, Duration)`, `completeReservation(UUID)`, and `cancelReservation(UUID)` use cases.
+- [x] **Done** — Reject occupied or foreign parking spaces, unregistered people, mismatched vehicle owners, and inactive reservations being completed or cancelled.
 - [x] **Done** — Provide `getAllSpaces`, `getAvailableSpaces`, `getAllReservations`, and `getActiveReservations` queries.
-- [x] **Done** — Keep use-case rules in the service and save completed reservations through the repository interface.
+- [x] **Done** — Keep use-case rules in the service and save completed and cancelled reservations through the repository interface.
 
-**Tests at this level:** `ReservationServiceTest` covers successful reservation/completion, occupied and foreign-space rejection, unregistered people, mismatched vehicle ownership, duplicate/unknown reservations, and availability before and after completion.
+**Tests at this level:** `ReservationServiceTest` covers successful reservation/completion/cancellation, occupied and foreign-space rejection, unregistered people, mismatched vehicle ownership, duplicate/unknown reservations, and availability before and after completion or cancellation.
 
 ## 3. Data storage
 
@@ -48,9 +48,10 @@ For this learning challenge, the repository interfaces are the storage abstracti
 - [x] **Done** — Provide a reservation form for person, vehicle, available space, and duration; register the person during booking.
 - [x] **Done** — Show the reservation ID and expected end time after booking.
 - [x] **Done** — Allow a reservation to be completed and refresh the space availability.
+- [x] **Done** — Allow an active reservation to be cancelled, show confirmation, and refresh space availability.
 - [x] **Done** — Show validation and reservation errors in the UI.
 
-**Tests at this level:** `ParkingControllerTest` covers the availability page, successful reservation and completion submissions, and user-visible reservation errors. Business rules remain covered by service tests.
+**Tests at this level:** `ParkingControllerTest` covers the availability page, reservation, completion and cancellation submissions, and user-visible reservation errors. Business rules remain covered by service tests.
 
 ## 5. End-to-end integration and release readiness
 
@@ -78,15 +79,15 @@ For this learning challenge, the repository interfaces are the storage abstracti
 
 **Acceptance:** Existing reservation flows pass against database-backed repositories, test data is isolated, migrations run from a clean database, and restart verification confirms data is retained.
 
-### Phase 2: Reservation cancellation
+### Phase 2: Reservation cancellation — unpaid flow implemented
 
-- [ ] Add a `CANCELLED` reservation status and a cancellation operation for active reservations.
-- [ ] Record the cancellation time, release the parking space, and keep cancelled reservations in history.
-- [ ] Add a cancel action for active reservations in the UI with clear success and error messages.
-- [ ] Reject cancellation of completed or already-cancelled reservations; verify cancellation makes the space available for another reservation.
-- [ ] Add model, service, controller, and end-to-end tests for successful and rejected cancellation flows.
+- [x] **Done** — Add a `CANCELLED` reservation status and a cancellation operation for active reservations.
+- [x] **Done** — Record the cancellation time, release the parking space, and keep cancelled reservations in history.
+- [x] **Done** — Add a cancel action for active reservations in the UI with clear success and error messages.
+- [x] **Done** — Reject cancellation of completed or already-cancelled reservations; verify cancellation makes the space available for another reservation.
+- [x] **Done** — Add model, service, controller, and end-to-end tests for successful and rejected cancellation flows.
 
-**Acceptance:** A user can cancel an active unpaid reservation from the UI; its space becomes available, the reservation remains in history as `CANCELLED`, and a second cancellation is rejected. Refund behavior for future paid reservations is deferred until a refund policy is approved.
+**Acceptance:** An active unpaid reservation can be cancelled from the UI; its space becomes available, the reservation remains in history as `CANCELLED`, and a second cancellation is rejected. Paid reservation/refund behavior remains future scope until a refund policy is approved.
 
 ### Phase 3: Pricing and estimates
 

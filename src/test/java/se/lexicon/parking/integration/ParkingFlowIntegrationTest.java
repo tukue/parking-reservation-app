@@ -74,4 +74,32 @@ class ParkingFlowIntegrationTest {
                 .andExpect(content().string(containsString("20</span> spaces available")))
                 .andExpect(content().string(containsString("There are no active reservations.")));
     }
+
+    @Test
+    void visitorCanCancelReservationAndReleaseSpace() throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", "Taylor Visitor")
+                        .param("phoneNumber", "+46123456789")
+                        .param("registrationNumber", "ABC123")
+                        .param("spaceId", "1")
+                        .param("durationHours", "2"))
+                .andExpect(status().is3xxRedirection());
+
+        var reservation = store.reservations().findAll().getFirst();
+        var parkingSpace = reservation.getParkingSpace();
+        assertEquals(ReservationStatus.ACTIVE, reservation.getStatus());
+        assertEquals(SpaceStatus.OCCUPIED, parkingSpace.getStatus());
+
+        mockMvc.perform(post("/reservations/{reservationId}/cancel", reservation.getReservationId()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("successMessage"));
+
+        assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+        assertTrue(store.reservations().findActive().isEmpty());
+
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("20</span> spaces available")));
+    }
 }

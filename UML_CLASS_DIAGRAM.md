@@ -27,6 +27,7 @@ classDiagram
         +Duration plannedDuration
         +LocalDateTime expectedEndTime
         +LocalDateTime actualEndTime
+        +LocalDateTime cancelledAt
         +ReservationStatus status
     }
 
@@ -40,6 +41,7 @@ classDiagram
         <<enumeration>>
         ACTIVE
         COMPLETED
+        CANCELLED
     }
 
     ParkingArea "1" *-- "20" ParkingSpace : contains
@@ -59,4 +61,5 @@ classDiagram
 - A parking space may have no reservations or many reservations over time, but no more than one active reservation at any moment.
 - `expectedEndTime` is calculated from `startTime` plus `plannedDuration`.
 - `actualEndTime` is set when the reservation is completed. Completing a reservation changes its status to `COMPLETED` and makes its space available.
+- Cancelling an active unpaid reservation sets `cancelledAt`, changes its status to `CANCELLED`, and makes its space available. A completed or cancelled reservation cannot be cancelled again.
 - `ParkingSpace.status` is `OCCUPIED` while it has an active reservation; otherwise it is `AVAILABLE`.

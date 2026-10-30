@@ -153,6 +153,40 @@ class ReservationServiceTest {
     }
 
     @Test
+    void cancelReservation_shouldRecordCancellationAndReleaseSpace() {
+        Reservation reservation = reservationService.createReservation(
+                person, vehicle, parkingSpace, Duration.ofHours(2));
+        LocalDateTime cancelledAt = reservation.getStartTime().plusMinutes(20);
+
+        Reservation cancelled = reservationService.cancelReservation(
+                reservation.getReservationId(), cancelledAt);
+
+        assertEquals(ReservationStatus.CANCELLED, cancelled.getStatus());
+        assertEquals(cancelledAt, cancelled.getCancelledAt());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+        assertTrue(reservationService.getActiveReservations().isEmpty());
+        assertEquals(1, reservationService.getAllReservations().size());
+
+        Reservation nextReservation = reservationService.createReservation(
+                person, vehicle, parkingSpace, Duration.ofHours(1));
+        assertEquals(ReservationStatus.ACTIVE, nextReservation.getStatus());
+    }
+
+    @Test
+    void cancelReservation_shouldRejectUnknownOrAlreadyCancelledReservation() {
+        assertThrows(IllegalArgumentException.class,
+                () -> reservationService.cancelReservation(UUID.randomUUID()));
+
+        Reservation reservation = reservationService.createReservation(
+                person, vehicle, parkingSpace, Duration.ofHours(2));
+        reservationService.cancelReservation(reservation.getReservationId());
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.cancelReservation(reservation.getReservationId()));
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+    }
+
+    @Test
     void getAvailableSpaces_shouldUpdateAfterReservationAndCompletion() {
         assertEquals(20, reservationService.getAllSpaces().size());
         assertEquals(20, reservationService.getAvailableSpaces().size());

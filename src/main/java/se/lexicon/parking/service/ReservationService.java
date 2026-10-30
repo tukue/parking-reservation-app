@@ -139,6 +139,23 @@ public class ReservationService {
         return reservation;
     }
 
+    public Reservation cancelReservation(UUID reservationId) {
+        return cancelReservation(reservationId, LocalDateTime.now());
+    }
+
+    public Reservation cancelReservation(UUID reservationId, LocalDateTime cancelledAt) {
+        Objects.requireNonNull(reservationId, "reservationId must not be null");
+        Objects.requireNonNull(cancelledAt, "cancelledAt must not be null");
+
+        Reservation reservation = reservationRepository
+                .findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+
+        reservation.cancel(cancelledAt);
+        reservationRepository.save(reservation);
+        return reservation;
+    }
+
     // Return all parking spaces.
     public List<ParkingSpace> getAllSpaces() {
         return parkingArea.getSpaces();

@@ -150,4 +150,16 @@ class ParkingControllerTest {
 
         verify(reservationService).completeReservation(reservationId);
     }
+
+    @Test
+    void cancellationFormCancelsTheReservation() throws Exception {
+        UUID reservationId = UUID.randomUUID();
+
+        mockMvc.perform(post("/reservations/{reservationId}/cancel", reservationId))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("successMessage",
+                        "Reservation cancelled. The space is available again."));
+
+        verify(reservationService).cancelReservation(reservationId);
+    }
 }
