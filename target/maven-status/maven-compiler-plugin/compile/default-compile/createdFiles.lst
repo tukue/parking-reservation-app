@@ -1,0 +1,8 @@
+se\lexicon\parking\ParkingArea.class
+se\lexicon\parking\Person.class
+se\lexicon\parking\Reservation.class
+se\lexicon\parking\ReservationStatus.class
+se\lexicon\parking\SpaceStatus.class
+se\lexicon\parking\ParkingSpace.class
+se\lexicon\parking\App.class
+se\lexicon\parking\Vehicle.class
