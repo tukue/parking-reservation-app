@@ -57,11 +57,11 @@ For this learning challenge, the repository interfaces are the storage abstracti
 **Suggested owner:** shared integration task. **Depends on:** service, storage, and interface tasks.
 
 - [x] **Done** — Wire the Spring Boot entry point to the UI, service, and shared in-memory storage.
-- [ ] Verify the full flow: register → view spaces → reserve → view occupied space → complete reservation → view available space.
-- [ ] Update the README with setup, run, and test instructions.
+- [x] **Done** — Verify the full flow: register → view spaces → reserve → view occupied space → complete reservation → view available space.
+- [x] **Done** — Update the README with setup, run, and test instructions.
 - [ ] Review the UML and domain notes against the implemented behavior.
 
-**Tests at this level:** an end-to-end test of the reservation flow using the selected storage configuration, plus `mvn clean verify` in CI.
+**Tests at this level:** `ParkingFlowIntegrationTest` exercises the full browser/controller/service/in-memory-storage flow. CI runs `mvn clean test` and packages the application.
 
 ## Team workflow
 
