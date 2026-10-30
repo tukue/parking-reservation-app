@@ -58,8 +58,9 @@ For this learning challenge, the repository interfaces are the storage abstracti
 
 - [x] **Done** — Wire the Spring Boot entry point to the UI, service, and shared in-memory storage.
 - [x] **Done** — Verify the full flow: register → view spaces → reserve → view occupied space → complete reservation → view available space.
+- [x] **Done** — Add and run `ParkingFlowIntegrationTest` against the Spring application and in-memory storage.
 - [x] **Done** — Update the README with setup, run, and test instructions.
-- [ ] Review the UML and domain notes against the implemented behavior.
+- [x] **Done** — Review the UML and domain notes against the implemented behavior.
 
 **Tests at this level:** `ParkingFlowIntegrationTest` exercises the full browser/controller/service/in-memory-storage flow. CI runs `mvn clean test` and packages the application.
 
@@ -70,3 +71,14 @@ For this learning challenge, the repository interfaces are the storage abstracti
 3. Implement the behavior and its tests together on a feature branch.
 4. Open a focused pull request; request review from a teammate.
 5. Merge only after CI passes, then rebase or update other feature branches from `main`.
+
+## Git workflow best practices
+
+- Start from an up-to-date `main` and create a branch for each focused task, using names such as `feature/reservation-service` or `fix/space-availability`.
+- Avoid committing directly to `main`. Keep each pull request focused and small enough for teammates to review.
+- Coordinate ownership of files and agree on shared method signatures before parallel changes to related features.
+- Make small commits with descriptive messages. Stage only the files for the task.
+- Do not commit generated output (`target/`), IDE settings (`.idea/`), local environment files, or secrets.
+- Before pushing a feature branch or opening a pull request, run `git fetch origin` and `git rebase origin/main` to replay your work on the latest `main`; then run `mvn clean verify` and check the CI result.
+- Resolve conflicts carefully and communicate before rewriting shared branch history; avoid force-pushing branches other teammates use.
+- Merge through a reviewed pull request after required checks pass, then update local `main` before starting the next task.
