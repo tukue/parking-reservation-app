@@ -70,4 +70,36 @@ class ReservationTest {
         assertEquals(firstEndTime, reservation.getActualEndTime());
         assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
     }
+
+    @Test
+    void cancellingReservationRecordsTimeAndReleasesSpace() {
+        Person person = new Person("Alex Example", "+46123456789");
+        ParkingSpace parkingSpace = new ParkingSpace("1");
+        LocalDateTime startTime = LocalDateTime.of(2026, 10, 29, 10, 0);
+        LocalDateTime cancelledAt = startTime.plusMinutes(15);
+        Reservation reservation = new Reservation(person, new Vehicle("ABC123", person), parkingSpace,
+                Duration.ofHours(2), startTime);
+
+        reservation.cancel(cancelledAt);
+
+        assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
+        assertEquals(cancelledAt, reservation.getCancelledAt());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+    }
+
+    @Test
+    void cannotCancelReservationMoreThanOnceOrCompleteItAfterCancellation() {
+        Person person = new Person("Alex Example", "+46123456789");
+        ParkingSpace parkingSpace = new ParkingSpace("1");
+        LocalDateTime startTime = LocalDateTime.of(2026, 10, 29, 10, 0);
+        Reservation reservation = new Reservation(person, new Vehicle("ABC123", person), parkingSpace,
+                Duration.ofHours(2), startTime);
+        LocalDateTime cancelledAt = startTime.plusMinutes(15);
+        reservation.cancel(cancelledAt);
+
+        assertThrows(IllegalStateException.class, () -> reservation.cancel(cancelledAt.plusMinutes(1)));
+        assertThrows(IllegalStateException.class, () -> reservation.complete(cancelledAt.plusMinutes(1)));
+        assertEquals(cancelledAt, reservation.getCancelledAt());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+    }
 }

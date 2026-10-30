@@ -39,7 +39,7 @@ mvn clean verify
 
 ## Storage approach
 
-For this learning project, data storage will initially use in-memory Java collections rather than a database. Keep shared repository instances alive for the duration of the application so reservations and parking-space availability stay consistent while it is running. Data is cleared when the application stops. Database persistence can be added later as a separate learning step.
+For this learning project, data storage uses in-memory Java collections rather than a database. Shared repository instances keep reservations and parking-space availability consistent while the application is running, including when a reservation is completed or cancelled. Data is cleared when the application stops. Database persistence can be added later as a separate learning step. Payments are not implemented; cancellation currently applies to unpaid reservations only.
 
 ## Project structure
 
@@ -89,6 +89,7 @@ classDiagram
         +Duration plannedDuration
         +LocalDateTime expectedEndTime
         +LocalDateTime actualEndTime
+        +LocalDateTime cancelledAt
         +ReservationStatus status
     }
 
@@ -102,6 +103,7 @@ classDiagram
         <<enumeration>>
         ACTIVE
         COMPLETED
+        CANCELLED
     }
 
     ParkingArea "1" *-- "20" ParkingSpace : contains

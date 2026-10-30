@@ -93,7 +93,7 @@
         <div th:unless="${activeReservations.isEmpty()}" class="table-wrap">
             <table>
                 <thead>
-                <tr><th>Space</th><th>Vehicle</th><th>Reservation</th><th>Expected end</th><th></th></tr>
+                <tr><th>Space</th><th>Vehicle</th><th>Reservation</th><th>Expected end</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                 <tr th:each="reservation : ${activeReservations}">
@@ -104,6 +104,10 @@
                     <td>
                         <form method="post" th:action="@{/reservations/{id}/complete(id=${reservation.reservationId})}">
                             <button type="submit" class="secondary-button">Complete</button>
+                        </form>
+                        <form method="post" th:action="@{/reservations/{id}/cancel(id=${reservation.reservationId})}"
+                              onsubmit="return confirm('Cancel this reservation and release the space?')">
+                            <button type="submit" class="secondary-button">Cancel</button>
                         </form>
                     </td>
                 </tr>

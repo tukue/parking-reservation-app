@@ -5,7 +5,7 @@
 
 ## Product context
 
-The current app lets people register, view spaces, create reservations, and complete them. It does not yet let users cancel an active reservation. Its repositories use in-memory collections, so data is lost when the application stops. The current domain also has no rate or payment concepts. These improvements should be delivered in stages: persistence first, cancellation next, then pricing and payment.
+The current app lets people register, view spaces, create reservations, complete them, and cancel active unpaid reservations. Its repositories use in-memory collections, so data is lost when the application stops. The current domain has no rate or payment concepts. Future improvements are persistence first, followed by pricing and payment; paid-cancellation/refund behavior remains undecided.
 
 ## Goals
 
@@ -28,7 +28,7 @@ The current app lets people register, view spaces, create reservations, and comp
 3. The app creates the reservation and, for paid parking, starts a payment flow with the selected payment provider.
 4. The app marks payment as confirmed only after a verified provider confirmation. A pending or failed payment is shown clearly and must not be presented as paid.
 5. On completion, the app records the actual end time and calculates the final amount according to the approved pricing policy. It records the payment result and shows a receipt or an outstanding-payment action.
-6. A user can cancel an active reservation. The app records when it was cancelled, marks it `CANCELLED`, and releases the space. Completed or already-cancelled reservations cannot be cancelled again.
+6. A user can cancel an active reservation. The app records when it was cancelled, marks it `CANCELLED`, and releases the space. Completed or already-cancelled reservations cannot be cancelled again. This is implemented for the current unpaid flow.
 
 The exact point at which a paid reservation becomes active (before payment, after successful payment, or after a temporary hold) is a product decision. The implementation must avoid leaving a space indefinitely blocked by an abandoned payment.
 For the current unpaid flow, cancellation releases the space and preserves the reservation in history. Once payments are introduced, the product must define whether cancellation triggers a full refund, partial refund, or no refund; a reservation must not be shown as refunded until the payment provider confirms it.

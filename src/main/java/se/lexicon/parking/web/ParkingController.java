@@ -86,4 +86,18 @@ public class ParkingController {
         }
         return "redirect:/";
     }
+
+    @PostMapping("/reservations/{reservationId}/cancel")
+    public String cancelReservation(
+            @PathVariable UUID reservationId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            reservationService.cancelReservation(reservationId);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Reservation cancelled. The space is available again.");
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+        }
+        return "redirect:/";
+    }
 }

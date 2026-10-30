@@ -14,6 +14,7 @@ public class Reservation {
     private final Duration plannedDuration;
     private final LocalDateTime expectedEndTime;
     private LocalDateTime actualEndTime;
+    private LocalDateTime cancelledAt;
     private ReservationStatus status;
 
     public Reservation(Person person, Vehicle vehicle, ParkingSpace parkingSpace, Duration plannedDuration) {
@@ -71,6 +72,10 @@ public class Reservation {
         return actualEndTime;
     }
 
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
     public ReservationStatus getStatus() {
         return status;
     }
@@ -81,14 +86,33 @@ public class Reservation {
 
     public void complete(LocalDateTime actualEndTime) {
         Objects.requireNonNull(actualEndTime, "actualEndTime must not be null");
-        if (status != ReservationStatus.ACTIVE) {
-            throw new IllegalStateException("Reservation is already completed");
-        }
+        requireActive();
         if (actualEndTime.isBefore(startTime)) {
             throw new IllegalArgumentException("actualEndTime cannot be before startTime");
         }
         this.actualEndTime = actualEndTime;
         this.status = ReservationStatus.COMPLETED;
         parkingSpace.release();
+    }
+
+    public void cancel() {
+        cancel(LocalDateTime.now());
+    }
+
+    public void cancel(LocalDateTime cancelledAt) {
+        Objects.requireNonNull(cancelledAt, "cancelledAt must not be null");
+        requireActive();
+        if (cancelledAt.isBefore(startTime)) {
+            throw new IllegalArgumentException("cancelledAt cannot be before startTime");
+        }
+        this.cancelledAt = cancelledAt;
+        this.status = ReservationStatus.CANCELLED;
+        parkingSpace.release();
+    }
+
+    private void requireActive() {
+        if (status != ReservationStatus.ACTIVE) {
+            throw new IllegalStateException("Reservation is not active (current status: " + status + ")");
+        }
     }
 }
