@@ -2,9 +2,14 @@
 
 A Java application starter for managing parking reservations at the Lexicon building.
 
+## Requirements
+
+- JDK 25 (LTS)
+- Apache Maven 3.8 or newer
+
 ## Run locally
 
-Install JDK 25 (LTS) and Apache Maven 3.8 or newer. Confirm Maven is using JDK 25:
+Confirm Maven is using JDK 25:
 
 ```bash
 java -version
