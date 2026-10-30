@@ -2,26 +2,35 @@
 
 A Java application starter for managing parking reservations at the Lexicon building.
 
-## Requirements
+## Run locally
 
-- JDK 25 (LTS)
-- Apache Maven 3.8 or newer
+Install JDK 25 (LTS) and Apache Maven 3.8 or newer. Confirm Maven is using JDK 25:
 
-Make sure `java -version` and `mvn -version` work in your terminal. On WSL, install JDK 25 inside the WSL environment and set `JAVA_HOME` to its installation directory if needed.
+```bash
+java -version
+mvn -version
+```
+
+If needed, set `JAVA_HOME` to your JDK 25 installation before starting Maven. Replace `/path/to/jdk-25` with the JDK installation directory on your computer:
+
+```bash
+export JAVA_HOME="/path/to/jdk-25"
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+Start the web application:
+
+```bash
+mvn spring-boot:run
+```
+
+Open [http://localhost:8080](http://localhost:8080) in a browser. Stop the app with `Ctrl+C`.
 
 ## Build and test
 
 ```bash
 mvn clean verify
 ```
-
-## Run
-
-```bash
-mvn exec:java
-```
-
-Then open [http://localhost:8080](http://localhost:8080) in a browser.
 
 ## Storage approach
 
