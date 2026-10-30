@@ -8,14 +8,14 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class AppTest {
+public class AppTest {
     @Test
     void mainPrintsApplicationName() {
         PrintStream originalOut = System.out;
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
             System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
-            App.main(new String[0]);
+            App.main();
         } finally {
             System.setOut(originalOut);
         }

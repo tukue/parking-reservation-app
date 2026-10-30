@@ -1,10 +1,15 @@
 package se.lexicon.parking.model;
 
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Person {
     private final String name;
     private final String phoneNumber;
+
+    public static final List<Person> people = new ArrayList<>();
+
 
     public Person(String name, String phoneNumber) {
         this.name = requireText(name, "name");
@@ -17,6 +22,19 @@ public class Person {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public void displayPerson(){
+        IO.println("Name: " + name);
+        IO.println("Phone Number: " + phoneNumber);
+    }
+
+    public static void addPerson(Person person) {
+        people.add(person);
+    }
+
+    public static List<Person> getPeople() {
+        return List.copyOf(people);
     }
 
     @Override
