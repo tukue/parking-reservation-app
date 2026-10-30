@@ -64,6 +64,59 @@ For this learning challenge, the repository interfaces are the storage abstracti
 
 **Tests at this level:** `ParkingFlowIntegrationTest` exercises the full browser/controller/service/in-memory-storage flow. CI runs `mvn clean test` and packages the application.
 
+## Future product roadmap
+
+**Proposed future scope:** The current learning version intentionally uses in-memory storage and does not charge for parking. Resolve the product decisions in [the design document](docs/FUTURE_PRODUCT_IMPROVEMENTS.md) before beginning the payment phases.
+
+### Phase 1: Persistent storage
+
+- [ ] Select the relational database and migration tool; document local setup and environment-based credentials.
+- [ ] Add schema migrations for people, vehicles, parking areas/spaces, and reservations.
+- [ ] Implement database-backed repository adapters while retaining in-memory adapters for unit tests.
+- [ ] Persist reservation and space state changes atomically; prevent more than one active reservation for a space under concurrent requests.
+- [ ] Add repository integration tests and verify reservations and availability survive an application restart.
+
+**Acceptance:** Existing reservation flows pass against database-backed repositories, test data is isolated, migrations run from a clean database, and restart verification confirms data is retained.
+
+### Phase 2: Reservation cancellation
+
+- [ ] Add a `CANCELLED` reservation status and a cancellation operation for active reservations.
+- [ ] Record the cancellation time, release the parking space, and keep cancelled reservations in history.
+- [ ] Add a cancel action for active reservations in the UI with clear success and error messages.
+- [ ] Reject cancellation of completed or already-cancelled reservations; verify cancellation makes the space available for another reservation.
+- [ ] Add model, service, controller, and end-to-end tests for successful and rejected cancellation flows.
+
+**Acceptance:** A user can cancel an active unpaid reservation from the UI; its space becomes available, the reservation remains in history as `CANCELLED`, and a second cancellation is rejected. Refund behavior for future paid reservations is deferred until a refund policy is approved.
+
+### Phase 3: Pricing and estimates
+
+- [ ] Agree on billing unit, currency, rounding, minimum/maximum charge, free periods, and rate effective dates.
+- [ ] Add a rate model that supports free and paid spaces; snapshot the applicable rate on each reservation.
+- [ ] Calculate and display an estimate before reservation confirmation and validate the amount server-side.
+- [ ] Add unit tests for free parking, rate changes, duration boundaries, and monetary rounding.
+
+**Acceptance:** The displayed estimate matches the server-calculated estimate and existing reservations retain their original rate snapshot after rate updates.
+
+### Phase 4: Payment-provider sandbox flow
+
+- [ ] Select a payment provider and collection timing; define pending-payment and space-hold behavior.
+- [ ] Add payment records and explicit payment statuses linked to reservations.
+- [ ] Add a provider-neutral payment service and a hosted-checkout adapter configured for sandbox mode.
+- [ ] Verify signed webhooks and make payment creation and webhook handling idempotent.
+- [ ] Show pending, successful, and failed payment states; provide a receipt or transaction reference after confirmation.
+- [ ] Add tests for success, failure, timeout, duplicate requests, forged/invalid webhooks, and provider retries.
+
+**Acceptance:** No reservation is presented as paid until the provider confirms it; retrying a request or webhook cannot duplicate a charge or payment record.
+
+### Phase 5: Operational readiness
+
+- [ ] Define payment reconciliation, support lookup, and approved refund procedures.
+- [ ] Add structured logs and monitoring for payment outcomes without logging secrets or sensitive card data.
+- [ ] Document privacy, retention, backup/restore, and production-secret handling.
+- [ ] Complete end-to-end sandbox testing and a product/security review before enabling live payments.
+
+**Acceptance:** Operators can investigate a reservation/payment by reference, restore persistent data from backup, and distinguish pending, failed, and successful transactions.
+
 ## Team workflow
 
 1. Pick one unchecked task and assign one owner.

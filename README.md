@@ -53,7 +53,8 @@ src/
 ```
 
 Domain concepts are documented in [DOMAIN_CONCEPTS.md](DOMAIN_CONCEPTS.md), with the main class model in [UML_CLASS_DIAGRAM.md](UML_CLASS_DIAGRAM.md).
-The team task breakdown is in [IMPLEMENTATION_TASKS.md](IMPLEMENTATION_TASKS.md).
+The team task breakdown is in [IMPLEMENTATION_TASKS.md](IMPLEMENTATION_TASKS.md), including the proposed [persistence and paid-parking roadmap](IMPLEMENTATION_TASKS.md#future-product-roadmap).
+The future-feature design is documented in [docs/FUTURE_PRODUCT_IMPROVEMENTS.md](docs/FUTURE_PRODUCT_IMPROVEMENTS.md).
 
 ## Learning resource
 
