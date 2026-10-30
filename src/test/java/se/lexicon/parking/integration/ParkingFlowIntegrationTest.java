@@ -47,7 +47,9 @@ class ParkingFlowIntegrationTest {
                 .andExpect(view().name("redirect:/"))
                 .andExpect(flash().attributeExists("successMessage"));
 
-        var reservation = store.reservations().findAll().getFirst();
+        var allReservations = store.reservations().findAll();
+        assertEquals(1, allReservations.size(), "Expected exactly one reservation after POST");
+        var reservation = allReservations.getFirst();
         var parkingSpace = reservation.getParkingSpace();
         assertEquals("Taylor Visitor", reservation.getPerson().getName());
         assertEquals("ABC123", reservation.getVehicle().getRegistrationNumber());
