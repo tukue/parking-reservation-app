@@ -13,8 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import se.lexicon.parking.model.ParkingSpace;
 import se.lexicon.parking.model.Person;
-import se.lexicon.parking.model.Reservation;
-import se.lexicon.parking.model.Vehicle;
+import se.lexicon.parking.model.SpaceStatus;
 import se.lexicon.parking.service.ReservationService;
 
 @Controller
@@ -56,14 +55,17 @@ public class ParkingController {
                 throw new IllegalArgumentException("Parking duration must be at least one hour");
             }
 
-            Person person = reservationService.registerPerson(new Person(name, phoneNumber));
-            Vehicle vehicle = new Vehicle(registrationNumber, person);
             ParkingSpace parkingSpace = reservationService.getAllSpaces().stream()
                     .filter(space -> space.getSpaceId().equals(spaceId))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Choose a valid parking space"));
-            Reservation reservation = reservationService.createReservation(
-                    person, vehicle, parkingSpace, Duration.ofHours(durationHours));
+            if (parkingSpace.getStatus() != SpaceStatus.AVAILABLE) {
+                throw new IllegalStateException("Parking space " + spaceId + " is already occupied");
+            }
+
+            var reservation = reservationService.bookReservation(
+                    new Person(name, phoneNumber), registrationNumber,
+                    parkingSpace, Duration.ofHours(durationHours));
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Reservation " + reservation.getReservationId() + " created. Expected end: "
