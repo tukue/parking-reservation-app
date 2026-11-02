@@ -70,7 +70,7 @@ class ParkingControllerTest {
     void reservationFormRegistersPersonAndCreatesReservation() throws Exception {
         Person person = new Person("Alex Example", "+46123456789");
         ParkingSpace space = new ParkingSpace("1");
-        Reservation reservation = new Reservation(person, new Vehicle("ABC123", person), space,
+        Reservation reservation = new Reservation(person, new Vehicle("ABC123", person), new ParkingSpace("2"),
                 Duration.ofHours(2), LocalDateTime.of(2026, 10, 29, 10, 0));
         when(reservationService.getAllSpaces()).thenReturn(List.of(space));
         when(reservationService.bookReservation(any(Person.class), eq("ABC123"), eq(space), any(Duration.class)))
