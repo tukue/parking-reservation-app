@@ -85,6 +85,7 @@ public class ReservationService {
     /** Validates the complete booking request before persisting its person or vehicle. */
     public synchronized Reservation bookReservation(
             Person person, String registrationNumber, ParkingSpace parkingSpace, Duration plannedDuration) {
+        completeExpiredReservationsAt(LocalDateTime.now());
         Objects.requireNonNull(person, "person must not be null");
         Objects.requireNonNull(parkingSpace, "parkingSpace must not be null");
         Objects.requireNonNull(plannedDuration, "plannedDuration must not be null");
@@ -157,6 +158,8 @@ public class ReservationService {
             ParkingSpace parkingSpace,
             Duration plannedDuration) {
 
+        completeExpiredReservationsAt(LocalDateTime.now());
+
         Objects.requireNonNull(person, "person must not be null");
         Objects.requireNonNull(vehicle, "vehicle must not be null");
         Objects.requireNonNull(parkingSpace, "parkingSpace must not be null");
@@ -219,6 +222,8 @@ public class ReservationService {
         Objects.requireNonNull(
                 actualEndTime, "actualEndTime must not be null");
 
+        completeExpiredReservationsAt(LocalDateTime.now());
+
         Reservation reservation = reservationRepository
                 .findById(reservationId)
                 .orElseThrow(() ->
@@ -247,6 +252,8 @@ public class ReservationService {
         Objects.requireNonNull(reservationId, "reservationId must not be null");
         Objects.requireNonNull(cancelledAt, "cancelledAt must not be null");
 
+        completeExpiredReservationsAt(LocalDateTime.now());
+
         Reservation reservation = reservationRepository
                 .findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
@@ -258,21 +265,34 @@ public class ReservationService {
 
     // Return all parking spaces.
     public List<ParkingSpace> getAllSpaces() {
+        completeExpiredReservationsAt(LocalDateTime.now());
         return parkingArea.getSpaces();
     }
 
     // Return only currently available spaces.
     public List<ParkingSpace> getAvailableSpaces() {
+        completeExpiredReservationsAt(LocalDateTime.now());
         return parkingArea.getAvailableSpaces();
     }
 
-    // Return all reservations, active and completed.
+    // Return reservation history, including active, completed, and cancelled reservations.
     public List<Reservation> getAllReservations() {
+        completeExpiredReservationsAt(LocalDateTime.now());
         return reservationRepository.findAll();
     }
 
     // Return only active reservations.
     public List<Reservation> getActiveReservations() {
+        completeExpiredReservationsAt(LocalDateTime.now());
         return reservationRepository.findActive();
+    }
+
+    private void completeExpiredReservationsAt(LocalDateTime now) {
+        for (Reservation reservation : reservationRepository.findActive()) {
+            if (!reservation.getExpectedEndTime().isAfter(now)) {
+                reservation.complete(reservation.getExpectedEndTime());
+                reservationRepository.save(reservation);
+            }
+        }
     }
 }

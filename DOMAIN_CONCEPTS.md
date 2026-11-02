@@ -59,5 +59,5 @@ reservation attributes
 2. Creating a reservation records its start time and planned duration, calculates the expected end time, and marks the selected space occupied.
 3. Completing a reservation records when the person leaves and makes the space available again.
 4. The availability display reflects whether each parking space is currently available or occupied.
-5. The expected end time is informational; reaching it does not complete the reservation or release the space.
-6. An active reservation keeps its space occupied until it is explicitly completed or cancelled.
+5. When the system next processes availability or a reservation action, an active reservation at or past its expected end time is completed, its expected end time is recorded as its end time, and its space is released.
+6. A person may complete a reservation early when leaving; cancelling an active reservation also releases the space.

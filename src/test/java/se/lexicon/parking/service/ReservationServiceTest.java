@@ -93,6 +93,24 @@ class ReservationServiceTest {
     }
 
     @Test
+    void expectedEndTime_shouldCompleteReservationAndReleaseSpaceOnNextServiceQuery() {
+        LocalDateTime startTime = LocalDateTime.now().minusHours(3);
+        Reservation reservation = new Reservation(
+                person, vehicle, parkingSpace, Duration.ofHours(2), startTime);
+        store.reservations().save(reservation);
+
+        assertEquals(ReservationStatus.ACTIVE, reservation.getStatus());
+        assertEquals(SpaceStatus.OCCUPIED, parkingSpace.getStatus());
+
+        assertTrue(reservationService.getAvailableSpaces().contains(parkingSpace));
+
+        assertEquals(ReservationStatus.COMPLETED, reservation.getStatus());
+        assertEquals(reservation.getExpectedEndTime(), reservation.getActualEndTime());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+        assertTrue(reservationService.getActiveReservations().isEmpty());
+    }
+
+    @Test
     void createReservation_shouldReserveAvailableSpace() {
         Reservation reservation = reservationService.createReservation(
                 person, vehicle, parkingSpace, Duration.ofHours(2));
