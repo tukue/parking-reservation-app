@@ -10,14 +10,18 @@ The system manages the 20 parking spaces at the Lexicon building in Växjö. It 
 
 A student, staff member, or visitor who registers and makes reservations.
 
+ person attributes
 - Name
 - Phone number
 
 ### Vehicle
 
 A vehicle associated with a person.
-
+ vehicle attributes
 - Vehicle registration number
+
+Each vehicle is retained as part of its owner's registration and can be used for
+multiple reservations. A registration number can belong to only one person.
 
 ### Parking area
 
@@ -31,12 +35,14 @@ A space in the parking area that can be available or occupied. Each space has an
 
 A record that a person and their vehicle are using a particular parking space for a period of time.
 
+reservation attributes
+
 - Unique reservation identifier
 - Start time
 - Planned parking duration
 - Expected end time
 - Actual end time, recorded when the person leaves
-- Status (active or completed)
+- Status (active, completed, or cancelled)
 
 ## Relationships
 
@@ -53,3 +59,5 @@ A record that a person and their vehicle are using a particular parking space fo
 2. Creating a reservation records its start time and planned duration, calculates the expected end time, and marks the selected space occupied.
 3. Completing a reservation records when the person leaves and makes the space available again.
 4. The availability display reflects whether each parking space is currently available or occupied.
+5. The expected end time is informational; reaching it does not complete the reservation or release the space.
+6. An active reservation keeps its space occupied until it is explicitly completed or cancelled.
