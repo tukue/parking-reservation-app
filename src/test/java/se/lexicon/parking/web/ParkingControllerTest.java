@@ -14,9 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import se.lexicon.parking.model.ParkingSpace;
 import se.lexicon.parking.model.Person;
 import se.lexicon.parking.model.Reservation;
+import se.lexicon.parking.model.SpaceStatus;
 import se.lexicon.parking.model.Vehicle;
 import se.lexicon.parking.service.ReservationService;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -114,6 +116,7 @@ class ParkingControllerTest {
         Person existingPerson = new Person("Existing Person", "+46123456789");
         new Reservation(existingPerson, new Vehicle("XYZ789", existingPerson), occupiedSpace,
                 Duration.ofHours(1));
+        assertEquals(SpaceStatus.OCCUPIED, occupiedSpace.getStatus());
         when(reservationService.getAllSpaces()).thenReturn(List.of(occupiedSpace));
 
         mockMvc.perform(post("/reservations")

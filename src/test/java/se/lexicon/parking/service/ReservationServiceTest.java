@@ -239,6 +239,22 @@ class ReservationServiceTest {
     }
 
     @Test
+    void cancelReservation_shouldRejectCompletedReservation() {
+        Reservation reservation = reservationService.createReservation(
+                person, vehicle, parkingSpace, Duration.ofHours(2));
+        LocalDateTime completedAt = reservation.getStartTime().plusMinutes(30);
+        reservationService.completeReservation(reservation.getReservationId(), completedAt);
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.cancelReservation(reservation.getReservationId()));
+
+        assertEquals(ReservationStatus.COMPLETED, reservation.getStatus());
+        assertEquals(completedAt, reservation.getActualEndTime());
+        assertNull(reservation.getCancelledAt());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+    }
+
+    @Test
     void cancelReservation_shouldRejectUnknownOrAlreadyCancelledReservation() {
         assertThrows(IllegalArgumentException.class,
                 () -> reservationService.cancelReservation(UUID.randomUUID()));
