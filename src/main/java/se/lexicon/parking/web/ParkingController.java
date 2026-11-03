@@ -45,14 +45,15 @@ public class ParkingController {
             @RequestParam String phoneNumber,
             @RequestParam String registrationNumber,
             @RequestParam(required = false) String spaceId,
-            @RequestParam int durationHours,
+            @RequestParam int durationMinutes,
             RedirectAttributes redirectAttributes) {
         try {
             if (spaceId == null || spaceId.isBlank()) {
                 throw new IllegalArgumentException("Please choose an available parking space");
             }
-            if (durationHours <= 0) {
-                throw new IllegalArgumentException("Parking duration must be at least one hour");
+            if (durationMinutes < 30 || durationMinutes % 30 != 0) {
+                throw new IllegalArgumentException(
+                        "Parking duration must be at least 30 minutes and in 30-minute increments");
             }
 
             ParkingSpace parkingSpace = reservationService.getAllSpaces().stream()
@@ -65,7 +66,7 @@ public class ParkingController {
 
             var reservation = reservationService.bookReservation(
                     new Person(name, phoneNumber), registrationNumber,
-                    parkingSpace, Duration.ofHours(durationHours));
+                    parkingSpace, Duration.ofMinutes(durationMinutes));
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Reservation " + reservation.getReservationId() + " created. Expected end: "

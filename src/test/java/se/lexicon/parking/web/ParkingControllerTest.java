@@ -73,7 +73,7 @@ class ParkingControllerTest {
         Person person = new Person("Alex Example", "+46123456789");
         ParkingSpace space = new ParkingSpace("1");
         Reservation reservation = new Reservation(person, new Vehicle("ABC123", person), new ParkingSpace("2"),
-                Duration.ofHours(2), LocalDateTime.of(2026, 10, 29, 10, 0));
+                Duration.ofMinutes(30), LocalDateTime.of(2026, 10, 29, 10, 0));
         when(reservationService.getAllSpaces()).thenReturn(List.of(space));
         when(reservationService.bookReservation(any(Person.class), eq("ABC123"), eq(space), any(Duration.class)))
                 .thenReturn(reservation);
@@ -83,13 +83,13 @@ class ParkingControllerTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", "1")
-                        .param("durationHours", "2"))
+                        .param("durationMinutes", "30"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"))
                 .andExpect(flash().attributeExists("successMessage"));
 
         verify(reservationService).bookReservation(any(Person.class), eq("ABC123"), eq(space),
-                eq(Duration.ofHours(2)));
+                eq(Duration.ofMinutes(30)));
     }
 
     @Test
@@ -105,7 +105,7 @@ class ParkingControllerTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", "1")
-                        .param("durationHours", "1"))
+                        .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Parking space 1 is already occupied"));
     }
@@ -124,7 +124,7 @@ class ParkingControllerTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", "1")
-                        .param("durationHours", "1"))
+                        .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Parking space 1 is already occupied"));
 
@@ -141,7 +141,7 @@ class ParkingControllerTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", "999")
-                        .param("durationHours", "1"))
+                        .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Choose a valid parking space"));
 
@@ -155,7 +155,7 @@ class ParkingControllerTest {
                         .param("name", "Alex Example")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("durationHours", "1"))
+                        .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Please choose an available parking space"));
 
@@ -169,7 +169,7 @@ class ParkingControllerTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", " ")
-                        .param("durationHours", "1"))
+                        .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Please choose an available parking space"));
 

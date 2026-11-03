@@ -42,7 +42,7 @@ class ParkingFlowIntegrationTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", "1")
-                        .param("durationHours", "2"))
+                        .param("durationMinutes", "120"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"))
                 .andExpect(flash().attributeExists("successMessage"));
@@ -82,7 +82,7 @@ class ParkingFlowIntegrationTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", "1")
-                        .param("durationHours", "2"))
+                        .param("durationMinutes", "120"))
                 .andExpect(status().is3xxRedirection());
 
         var reservation = store.reservations().findAll().getFirst();
