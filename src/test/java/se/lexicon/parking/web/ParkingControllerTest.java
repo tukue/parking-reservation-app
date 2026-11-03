@@ -52,7 +52,7 @@ class ParkingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andExpect(model().attribute("spaces", List.of(space)))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Parking spaces")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Parking spots")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Make a reservation")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("http-equiv=\"refresh\""))));
@@ -83,7 +83,7 @@ class ParkingControllerTest {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("availabilityPercent", 0.0))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("spaces available")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("spots available")));
     }
 
     @Test
@@ -100,7 +100,7 @@ class ParkingControllerTest {
                         .param("name", "Alex Example")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("spaceId", "1")
+                        .param("spotId", "1")
                         .param("durationMinutes", "30"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"))
@@ -122,7 +122,7 @@ class ParkingControllerTest {
                         .param("name", "Alex Example")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("spaceId", "1")
+                        .param("spotId", "1")
                         .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Parking space 1 is already occupied"));
@@ -141,10 +141,10 @@ class ParkingControllerTest {
                         .param("name", "Alex Example")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("spaceId", "1")
+                        .param("spotId", "1")
                         .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("errorMessage", "Parking space 1 is already occupied"));
+                .andExpect(flash().attribute("errorMessage", "Parking spot 1 is already occupied"));
 
         verify(reservationService).getAllSpaces();
         org.mockito.Mockito.verifyNoMoreInteractions(reservationService);
@@ -158,10 +158,10 @@ class ParkingControllerTest {
                         .param("name", "Alex Example")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("spaceId", "999")
+                        .param("spotId", "999")
                         .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("errorMessage", "Choose a valid parking space"));
+                .andExpect(flash().attribute("errorMessage", "Choose a valid parking spot"));
 
         verify(reservationService).getAllSpaces();
         org.mockito.Mockito.verifyNoMoreInteractions(reservationService);
@@ -175,7 +175,7 @@ class ParkingControllerTest {
                         .param("registrationNumber", "ABC123")
                         .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("errorMessage", "Please choose an available parking space"));
+                .andExpect(flash().attribute("errorMessage", "Please choose an available parking spot"));
 
         verifyNoInteractions(reservationService);
     }
@@ -186,10 +186,10 @@ class ParkingControllerTest {
                         .param("name", "Alex Example")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("spaceId", " ")
+                        .param("spotId", " ")
                         .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("errorMessage", "Please choose an available parking space"));
+                .andExpect(flash().attribute("errorMessage", "Please choose an available parking spot"));
 
         verifyNoInteractions(reservationService);
     }
@@ -212,7 +212,7 @@ class ParkingControllerTest {
         mockMvc.perform(post("/reservations/{reservationId}/cancel", reservationId))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("successMessage",
-                        "Reservation cancelled. The space is available again."));
+                        "Reservation cancelled. The parking place is available again."));
 
         verify(reservationService).cancelReservation(reservationId);
     }

@@ -8,7 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import se.lexicon.parking.model.ReservationStatus;
-import se.lexicon.parking.model.SpaceStatus;
+import se.lexicon.parking.model.ParkingPlaceStatus;
 import se.lexicon.parking.storage.memory.InMemoryParkingStore;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,13 +35,13 @@ class ParkingFlowIntegrationTest {
     void visitorCanRegisterReserveAndCompleteParking() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("20</span> spaces available")));
+                .andExpect(content().string(containsString("20</span> spots available")));
 
         mockMvc.perform(post("/reservations")
                         .param("name", "Taylor Visitor")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("spaceId", "1")
+                        .param("spotId", "1")
                         .param("durationMinutes", "120"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"))
@@ -50,15 +50,15 @@ class ParkingFlowIntegrationTest {
         var allReservations = store.reservations().findAll();
         assertEquals(1, allReservations.size(), "Expected exactly one reservation after POST");
         var reservation = allReservations.getFirst();
-        var parkingSpace = reservation.getParkingSpace();
+        var parkingSpot = reservation.getParkingPlace();
         assertEquals("Taylor Visitor", reservation.getPerson().getName());
         assertEquals("ABC123", reservation.getVehicle().getRegistrationNumber());
         assertEquals(ReservationStatus.ACTIVE, reservation.getStatus());
-        assertEquals(SpaceStatus.OCCUPIED, parkingSpace.getStatus());
+        assertEquals(ParkingPlaceStatus.OCCUPIED, parkingSpot.getStatus());
 
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("19</span> spaces available")))
+                .andExpect(content().string(containsString("19</span> spots available")))
                 .andExpect(content().string(containsString("ABC123")));
 
         mockMvc.perform(post("/reservations/{reservationId}/complete", reservation.getReservationId()))
@@ -66,12 +66,12 @@ class ParkingFlowIntegrationTest {
                 .andExpect(flash().attributeExists("successMessage"));
 
         assertEquals(ReservationStatus.COMPLETED, reservation.getStatus());
-        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+        assertEquals(ParkingPlaceStatus.AVAILABLE, parkingSpot.getStatus());
         assertTrue(store.reservations().findActive().isEmpty());
 
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("20</span> spaces available")))
+                .andExpect(content().string(containsString("20</span> spots available")))
                 .andExpect(content().string(containsString("There are no active reservations.")));
     }
 
@@ -81,25 +81,25 @@ class ParkingFlowIntegrationTest {
                         .param("name", "Taylor Visitor")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("spaceId", "1")
+                        .param("spotId", "1")
                         .param("durationMinutes", "120"))
                 .andExpect(status().is3xxRedirection());
 
         var reservation = store.reservations().findAll().getFirst();
-        var parkingSpace = reservation.getParkingSpace();
+        var parkingSpot = reservation.getParkingPlace();
         assertEquals(ReservationStatus.ACTIVE, reservation.getStatus());
-        assertEquals(SpaceStatus.OCCUPIED, parkingSpace.getStatus());
+        assertEquals(ParkingPlaceStatus.OCCUPIED, parkingSpot.getStatus());
 
         mockMvc.perform(post("/reservations/{reservationId}/cancel", reservation.getReservationId()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeExists("successMessage"));
 
         assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
-        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+        assertEquals(ParkingPlaceStatus.AVAILABLE, parkingSpot.getStatus());
         assertTrue(store.reservations().findActive().isEmpty());
 
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("20</span> spaces available")));
+                .andExpect(content().string(containsString("20</span> spots available")));
     }
 }

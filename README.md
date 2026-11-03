@@ -69,14 +69,14 @@ The simplified three-class UML diagram is kept separate as a [learning model](do
 
 ```mermaid
 classDiagram
-    class ParkingArea {
+    class ParkingLot {
         +String name
         +int capacity
     }
 
-    class ParkingSpace {
-        +String spaceId
-        +SpaceStatus status
+    class ParkingPlace {
+        +String spotId
+        +ParkingPlaceStatus status
     }
 
     class Person {
@@ -98,7 +98,7 @@ classDiagram
         +ReservationStatus status
     }
 
-    class SpaceStatus {
+    class ParkingPlaceStatus {
         <<enumeration>>
         AVAILABLE
         OCCUPIED
@@ -111,11 +111,11 @@ classDiagram
         CANCELLED
     }
 
-    ParkingArea "1" *-- "20" ParkingSpace : contains
+    ParkingLot "1" *-- "20" ParkingPlace : contains
     Person "1" -- "0..*" Vehicle : owns
     Person "1" -- "0..*" Reservation : makes
     Vehicle "1" -- "0..*" Reservation : is used for
-    ParkingSpace "1" -- "0..*" Reservation : is reserved in
-    ParkingSpace ..> SpaceStatus : has
+    ParkingPlace "1" -- "0..*" Reservation : is reserved in
+    ParkingPlace ..> ParkingPlaceStatus : has
     Reservation ..> ReservationStatus : has
 ```

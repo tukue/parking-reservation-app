@@ -9,7 +9,7 @@ public class Reservation {
     private final UUID reservationId;
     private final Person person;
     private final Vehicle vehicle;
-    private final ParkingSpace parkingSpace;
+    private final ParkingPlace parkingPlace;
     private final LocalDateTime startTime;
     private final Duration plannedDuration;
     private final LocalDateTime expectedEndTime;
@@ -17,18 +17,18 @@ public class Reservation {
     private LocalDateTime cancelledAt;
     private ReservationStatus status;
 
-    public Reservation(Person person, Vehicle vehicle, ParkingSpace parkingSpace, Duration plannedDuration) {
-        this(person, vehicle, parkingSpace, plannedDuration, LocalDateTime.now());
+    public Reservation(Person person, Vehicle vehicle, ParkingPlace parkingPlace, Duration plannedDuration) {
+        this(person, vehicle, parkingPlace, plannedDuration, LocalDateTime.now());
     }
 
-    public Reservation(Person person, Vehicle vehicle, ParkingSpace parkingSpace,
+    public Reservation(Person person, Vehicle vehicle, ParkingPlace parkingPlace,
                        Duration plannedDuration, LocalDateTime startTime) {
         this.person = Objects.requireNonNull(person, "person must not be null");
         this.vehicle = Objects.requireNonNull(vehicle, "vehicle must not be null");
         if (!vehicle.getOwner().equals(person)) {
             throw new IllegalArgumentException("Vehicle must belong to the reserving person");
         }
-        this.parkingSpace = Objects.requireNonNull(parkingSpace, "parkingSpace must not be null");
+        this.parkingPlace = Objects.requireNonNull(parkingPlace, "parkingPlace must not be null");
         this.plannedDuration = Objects.requireNonNull(plannedDuration, "plannedDuration must not be null");
         if (plannedDuration.isZero() || plannedDuration.isNegative()) {
             throw new IllegalArgumentException("plannedDuration must be positive");
@@ -37,7 +37,7 @@ public class Reservation {
         this.expectedEndTime = startTime.plus(plannedDuration);
         this.reservationId = UUID.randomUUID();
         this.status = ReservationStatus.ACTIVE;
-        parkingSpace.occupy();
+        parkingPlace.occupy();
     }
 
     public UUID getReservationId() {
@@ -52,8 +52,14 @@ public class Reservation {
         return vehicle;
     }
 
-    public ParkingSpace getParkingSpace() {
-        return parkingSpace;
+    public ParkingPlace getParkingPlace() {
+        return parkingPlace;
+    }
+
+    /** @deprecated Use {@link #getParkingPlace()}. */
+    @Deprecated(forRemoval = true)
+    public ParkingPlace getParkingSpace() {
+        return parkingPlace;
     }
 
     public LocalDateTime getStartTime() {
@@ -92,7 +98,7 @@ public class Reservation {
         }
         this.actualEndTime = actualEndTime;
         this.status = ReservationStatus.COMPLETED;
-        parkingSpace.release();
+        parkingPlace.release();
     }
 
     public void cancel() {
@@ -107,7 +113,7 @@ public class Reservation {
         }
         this.cancelledAt = cancelledAt;
         this.status = ReservationStatus.CANCELLED;
-        parkingSpace.release();
+        parkingPlace.release();
     }
 
     private void requireActive() {

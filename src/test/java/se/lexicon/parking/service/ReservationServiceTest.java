@@ -8,10 +8,11 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import se.lexicon.parking.model.ParkingSpace;
+import se.lexicon.parking.model.ParkingPlace;
 import se.lexicon.parking.model.Person;
 import se.lexicon.parking.model.Reservation;
 import se.lexicon.parking.model.ReservationStatus;
+import se.lexicon.parking.model.ParkingPlaceStatus;
 import se.lexicon.parking.model.SpaceStatus;
 import se.lexicon.parking.model.Vehicle;
 import se.lexicon.parking.storage.memory.InMemoryParkingStore;
@@ -25,21 +26,21 @@ class ReservationServiceTest {
 
     private Person person;
     private Vehicle vehicle;
-    private ParkingSpace parkingSpace;
+    private ParkingPlace parkingSpace;
 
     @BeforeEach
     void setUp() {
         store = new InMemoryParkingStore("Test Parking");
 
         reservationService = new ReservationService(
-                store.parkingArea(),
+                store.parkingLot(),
                 store.people(),
                 store.reservations());
 
         person = new Person("Padma", "0701234567");
         vehicle = new Vehicle("ABC123", person);
         person.addVehicle(vehicle);
-        parkingSpace = store.parkingArea().getSpaces().getFirst();
+        parkingSpace = store.parkingLot().getParkingPlaces().getFirst();
 
         // Register the person before creating reservations.
         store.people().save(person);
@@ -69,7 +70,7 @@ class ReservationServiceTest {
     void bookReservation_shouldNotRegisterPersonWhenSpaceIsUnavailable() {
         reservationService.createReservation(person, vehicle, parkingSpace, Duration.ofHours(1));
         Person newPerson = new Person("New Person", "0700000000");
-        ParkingSpace otherOccupiedSpace = parkingSpace;
+        ParkingPlace otherOccupiedSpace = parkingSpace;
 
         assertThrows(IllegalStateException.class, () -> reservationService.bookReservation(
                 newPerson, "NEW123", otherOccupiedSpace, Duration.ofHours(1)));
@@ -290,12 +291,12 @@ class ReservationServiceTest {
     }
 
     @Test
-    void createReservation_shouldRejectSpaceFromAnotherParkingArea() {
+    void createReservation_shouldRejectPlaceFromAnotherParkingLot() {
         InMemoryParkingStore anotherStore =
                 new InMemoryParkingStore("Another Parking");
 
-        ParkingSpace foreignSpace =
-                anotherStore.parkingArea().getSpaces().getFirst();
+        ParkingPlace foreignSpace =
+                anotherStore.parkingLot().getParkingPlaces().getFirst();
 
         assertThrows(IllegalArgumentException.class,
                 () -> reservationService.createReservation(

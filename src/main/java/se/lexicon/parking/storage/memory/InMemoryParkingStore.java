@@ -2,7 +2,7 @@ package se.lexicon.parking.storage.memory;
 
 import java.util.Objects;
 
-import se.lexicon.parking.model.ParkingArea;
+import se.lexicon.parking.model.ParkingLot;
 import se.lexicon.parking.storage.PersonRepository;
 import se.lexicon.parking.storage.ReservationRepository;
 
@@ -10,13 +10,13 @@ import se.lexicon.parking.storage.ReservationRepository;
 public class InMemoryParkingStore {
     private final PersonRepository people;
     private final ReservationRepository reservations;
-    private final ParkingArea parkingArea;
+    private final ParkingLot parkingLot;
 
-    public InMemoryParkingStore(String parkingAreaName) {
+    public InMemoryParkingStore(String parkingLotName) {
         this.people = new InMemoryPersonRepository();
         this.reservations = new InMemoryReservationRepository();
-        this.parkingArea = new ParkingArea(Objects.requireNonNull(parkingAreaName,
-                "parkingAreaName must not be null"));
+        this.parkingLot = new ParkingLot(Objects.requireNonNull(parkingLotName,
+                "parkingLotName must not be null"));
     }
 
     public PersonRepository people() {
@@ -27,7 +27,8 @@ public class InMemoryParkingStore {
         return reservations;
     }
 
-    public ParkingArea parkingArea() {
-        return parkingArea;
+    public ParkingLot parkingLot() {
+        return parkingLot;
     }
+
 }

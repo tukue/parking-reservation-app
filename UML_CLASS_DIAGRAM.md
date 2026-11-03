@@ -2,14 +2,14 @@
 
 ```mermaid
 classDiagram
-    class ParkingArea {
+    class ParkingLot {
         +String name
         +int capacity
     }
 
-    class ParkingSpace {
-        +String spaceId
-        +SpaceStatus status
+    class ParkingPlace {
+        +String spotId
+        +ParkingPlaceStatus status
     }
 
     class Person {
@@ -31,7 +31,7 @@ classDiagram
         +ReservationStatus status
     }
 
-    class SpaceStatus {
+    class ParkingPlaceStatus {
         <<enumeration>>
         AVAILABLE
         OCCUPIED
@@ -44,23 +44,23 @@ classDiagram
         CANCELLED
     }
 
-    ParkingArea "1" *-- "20" ParkingSpace : contains
+    ParkingLot "1" *-- "20" ParkingPlace : contains
     Person "1" -- "0..*" Vehicle : owns
     Person "1" -- "0..*" Reservation : makes
     Vehicle "1" -- "0..*" Reservation : is used for
-    ParkingSpace "1" -- "0..*" Reservation : is reserved in
-    ParkingSpace ..> SpaceStatus : has
+    ParkingPlace "1" -- "0..*" Reservation : is reserved in
+    ParkingPlace ..> ParkingPlaceStatus : has
     Reservation ..> ReservationStatus : has
 ```
 
 ## Multiplicities and domain constraints
 
-- The parking area contains exactly 20 parking spaces.
+- The parking lot contains exactly 20 parking places.
 - Each vehicle has one registered person; a person may register zero or more vehicles.
-- Each reservation belongs to exactly one person, uses exactly one vehicle, and reserves exactly one parking space. Each of those can be associated with multiple reservations over time.
-- A parking space may have no reservations or many reservations over time, but no more than one active reservation at any moment.
+- Each reservation belongs to exactly one person, uses exactly one vehicle, and reserves exactly one parking place. Each of those can be associated with multiple reservations over time.
+- A parking place may have no reservations or many reservations over time, but no more than one active reservation at any moment.
 - `expectedEndTime` is calculated from `startTime` plus `plannedDuration`.
-- When the system next evaluates reservations at or after `expectedEndTime`, it completes the reservation, sets `actualEndTime` to `expectedEndTime`, and makes the space available.
-- A person may complete a reservation early; this records the actual checkout time, changes its status to `COMPLETED`, and makes its space available.
-- Cancelling an active unpaid reservation sets `cancelledAt`, changes its status to `CANCELLED`, and makes its space available. A completed or cancelled reservation cannot be cancelled again.
-- `ParkingSpace.status` is `OCCUPIED` while it has an active reservation; it becomes `AVAILABLE` when the reservation is completed, cancelled, or processed as complete after its expected end time.
+- When the system next evaluates reservations at or after `expectedEndTime`, it completes the reservation, sets `actualEndTime` to `expectedEndTime`, and makes the place available.
+- A person may complete a reservation early; this records the actual checkout time, changes its status to `COMPLETED`, and makes the place available.
+- Cancelling an active unpaid reservation sets `cancelledAt`, changes its status to `CANCELLED`, and makes the place available. A completed or cancelled reservation cannot be cancelled again.
+- `ParkingPlace.status` is `OCCUPIED` while it has an active reservation; it becomes `AVAILABLE` when the reservation is completed, cancelled, or processed as complete after its expected end time.

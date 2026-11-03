@@ -40,7 +40,7 @@ Use a relational database with migrations. PostgreSQL is the proposed production
 Proposed persistent records:
 
 - **Person** and **Vehicle:** stable identifiers and the existing contact/registration data; apply access controls and retention rules to personal data.
-- **ParkingArea** and **ParkingSpace:** stable identifiers and current configuration. Avoid relying on process-local object identity.
+- **ParkingLot** and **ParkingPlace:** stable identifiers and current configuration. Avoid relying on process-local object identity.
 - **Reservation:** person, vehicle, space, start and expected/actual end times, status (`ACTIVE`, `COMPLETED`, or `CANCELLED`), cancellation time when applicable, and a snapshot of the pricing rule used when the reservation was created.
 - **ParkingRate:** amount, currency, billing unit, effective dates, and whether the space is free. Rate changes must not silently rewrite existing reservations.
 - **Payment:** reservation, amount in the currency's smallest unit (for example öre for SEK), currency, provider, provider reference, status, and timestamps. Store no card number or security code.
