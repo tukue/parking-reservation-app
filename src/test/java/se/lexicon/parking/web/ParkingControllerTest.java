@@ -53,7 +53,25 @@ class ParkingControllerTest {
                 .andExpect(view().name("index"))
                 .andExpect(model().attribute("spaces", List.of(space)))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Parking spaces")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Make a reservation")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Make a reservation")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("http-equiv=\"refresh\""))));
+    }
+
+    @Test
+    void homeRefreshesWhileReservationsAreActive() throws Exception {
+        Person person = new Person("Alex Example", "+46123456789");
+        Reservation activeReservation = new Reservation(person, new Vehicle("ABC123", person),
+                new ParkingSpace("1"), Duration.ofHours(1));
+        ParkingSpace space = new ParkingSpace("2");
+        when(reservationService.getAllSpaces()).thenReturn(List.of(space));
+        when(reservationService.getAvailableSpaces()).thenReturn(List.of(space));
+        when(reservationService.getActiveReservations()).thenReturn(List.of(activeReservation));
+
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "http-equiv=\"refresh\" content=\"30\"")));
     }
 
     @Test
