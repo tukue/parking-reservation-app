@@ -14,9 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import se.lexicon.parking.model.ParkingSpace;
 import se.lexicon.parking.model.Person;
 import se.lexicon.parking.model.Reservation;
+import se.lexicon.parking.model.SpaceStatus;
 import se.lexicon.parking.model.Vehicle;
 import se.lexicon.parking.service.ReservationService;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -70,11 +72,10 @@ class ParkingControllerTest {
     void reservationFormRegistersPersonAndCreatesReservation() throws Exception {
         Person person = new Person("Alex Example", "+46123456789");
         ParkingSpace space = new ParkingSpace("1");
-        Reservation reservation = new Reservation(person, new Vehicle("ABC123", person), space,
-                Duration.ofHours(2), LocalDateTime.of(2026, 10, 29, 10, 0));
-        when(reservationService.registerPerson(any(Person.class))).thenReturn(person);
+        Reservation reservation = new Reservation(person, new Vehicle("ABC123", person), new ParkingSpace("2"),
+                Duration.ofMinutes(30), LocalDateTime.of(2026, 10, 29, 10, 0));
         when(reservationService.getAllSpaces()).thenReturn(List.of(space));
-        when(reservationService.createReservation(eq(person), any(Vehicle.class), eq(space), any(Duration.class)))
+        when(reservationService.bookReservation(any(Person.class), eq("ABC123"), eq(space), any(Duration.class)))
                 .thenReturn(reservation);
 
         mockMvc.perform(post("/reservations")
@@ -82,35 +83,70 @@ class ParkingControllerTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", "1")
-                        .param("durationHours", "2"))
+                        .param("durationMinutes", "30"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"))
                 .andExpect(flash().attributeExists("successMessage"));
 
-        verify(reservationService).registerPerson(any(Person.class));
-        verify(reservationService).createReservation(eq(person), any(Vehicle.class), eq(space),
-                eq(Duration.ofHours(2)));
+        verify(reservationService).bookReservation(any(Person.class), eq("ABC123"), eq(space),
+                eq(Duration.ofMinutes(30)));
     }
 
     @Test
     void reservationFailureReturnsUserFacingError() throws Exception {
-        Person person = new Person("Alex Example", "+46123456789");
         ParkingSpace space = new ParkingSpace("1");
-        when(reservationService.registerPerson(any(Person.class))).thenReturn(person);
         when(reservationService.getAllSpaces()).thenReturn(List.of(space));
         doThrow(new IllegalStateException("Parking space 1 is already occupied"))
                 .when(reservationService)
-                .createReservation(any(Person.class), any(Vehicle.class), any(ParkingSpace.class),
-                        any(Duration.class));
+                .bookReservation(any(Person.class), eq("ABC123"), any(ParkingSpace.class), any(Duration.class));
 
         mockMvc.perform(post("/reservations")
                         .param("name", "Alex Example")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", "1")
-                        .param("durationHours", "1"))
+                        .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Parking space 1 is already occupied"));
+    }
+
+    @Test
+    void occupiedSpaceIsRejectedBeforeRegisteringPersonOrVehicle() throws Exception {
+        ParkingSpace occupiedSpace = new ParkingSpace("1");
+        Person existingPerson = new Person("Existing Person", "+46123456789");
+        new Reservation(existingPerson, new Vehicle("XYZ789", existingPerson), occupiedSpace,
+                Duration.ofHours(1));
+        assertEquals(SpaceStatus.OCCUPIED, occupiedSpace.getStatus());
+        when(reservationService.getAllSpaces()).thenReturn(List.of(occupiedSpace));
+
+        mockMvc.perform(post("/reservations")
+                        .param("name", "Alex Example")
+                        .param("phoneNumber", "+46123456789")
+                        .param("registrationNumber", "ABC123")
+                        .param("spaceId", "1")
+                        .param("durationMinutes", "60"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Parking space 1 is already occupied"));
+
+        verify(reservationService).getAllSpaces();
+        org.mockito.Mockito.verifyNoMoreInteractions(reservationService);
+    }
+
+    @Test
+    void unknownSpaceIsRejectedBeforeRegisteringPersonOrVehicle() throws Exception {
+        when(reservationService.getAllSpaces()).thenReturn(List.of(new ParkingSpace("1")));
+
+        mockMvc.perform(post("/reservations")
+                        .param("name", "Alex Example")
+                        .param("phoneNumber", "+46123456789")
+                        .param("registrationNumber", "ABC123")
+                        .param("spaceId", "999")
+                        .param("durationMinutes", "60"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Choose a valid parking space"));
+
+        verify(reservationService).getAllSpaces();
+        org.mockito.Mockito.verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -119,7 +155,7 @@ class ParkingControllerTest {
                         .param("name", "Alex Example")
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
-                        .param("durationHours", "1"))
+                        .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Please choose an available parking space"));
 
@@ -133,7 +169,7 @@ class ParkingControllerTest {
                         .param("phoneNumber", "+46123456789")
                         .param("registrationNumber", "ABC123")
                         .param("spaceId", " ")
-                        .param("durationHours", "1"))
+                        .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Please choose an available parking space"));
 

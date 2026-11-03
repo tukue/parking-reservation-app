@@ -1,10 +1,13 @@
 package se.lexicon.parking.model;
 
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Person {
     private final String name;
     private final String phoneNumber;
+    private final List<Vehicle> vehicles = new ArrayList<>();
 
     public Person(String name, String phoneNumber) {
         this.name = requireText(name, "name");
@@ -17,6 +20,21 @@ public class Person {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public List<Vehicle> getVehicles() {
+        return List.copyOf(vehicles);
+    }
+
+    public void addVehicle(Vehicle vehicle) {
+        Objects.requireNonNull(vehicle, "vehicle must not be null");
+        if (!vehicle.getOwner().equals(this)) {
+            throw new IllegalArgumentException("Vehicle must belong to this person");
+        }
+        if (vehicles.stream().noneMatch(existing -> existing.getRegistrationNumber()
+                .equalsIgnoreCase(vehicle.getRegistrationNumber()))) {
+            vehicles.add(vehicle);
+        }
     }
 
     @Override

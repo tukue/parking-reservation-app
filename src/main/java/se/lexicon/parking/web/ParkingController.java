@@ -13,8 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import se.lexicon.parking.model.ParkingSpace;
 import se.lexicon.parking.model.Person;
-import se.lexicon.parking.model.Reservation;
-import se.lexicon.parking.model.Vehicle;
+import se.lexicon.parking.model.SpaceStatus;
 import se.lexicon.parking.service.ReservationService;
 
 @Controller
@@ -46,24 +45,28 @@ public class ParkingController {
             @RequestParam String phoneNumber,
             @RequestParam String registrationNumber,
             @RequestParam(required = false) String spaceId,
-            @RequestParam int durationHours,
+            @RequestParam int durationMinutes,
             RedirectAttributes redirectAttributes) {
         try {
             if (spaceId == null || spaceId.isBlank()) {
                 throw new IllegalArgumentException("Please choose an available parking space");
             }
-            if (durationHours <= 0) {
-                throw new IllegalArgumentException("Parking duration must be at least one hour");
+            if (durationMinutes < 30 || durationMinutes % 30 != 0) {
+                throw new IllegalArgumentException(
+                        "Parking duration must be at least 30 minutes and in 30-minute increments");
             }
 
-            Person person = reservationService.registerPerson(new Person(name, phoneNumber));
-            Vehicle vehicle = new Vehicle(registrationNumber, person);
             ParkingSpace parkingSpace = reservationService.getAllSpaces().stream()
                     .filter(space -> space.getSpaceId().equals(spaceId))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Choose a valid parking space"));
-            Reservation reservation = reservationService.createReservation(
-                    person, vehicle, parkingSpace, Duration.ofHours(durationHours));
+            if (parkingSpace.getStatus() != SpaceStatus.AVAILABLE) {
+                throw new IllegalStateException("Parking space " + spaceId + " is already occupied");
+            }
+
+            var reservation = reservationService.bookReservation(
+                    new Person(name, phoneNumber), registrationNumber,
+                    parkingSpace, Duration.ofMinutes(durationMinutes));
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Reservation " + reservation.getReservationId() + " created. Expected end: "

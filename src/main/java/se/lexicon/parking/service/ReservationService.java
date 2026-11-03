@@ -3,6 +3,7 @@ package se.lexicon.parking.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.DateTimeException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,7 +40,7 @@ public class ReservationService {
                 reservationRepository, "reservationRepository must not be null");
     }
 
-    public Person registerPerson(Person person) {
+    public synchronized Person registerPerson(Person person) {
         Objects.requireNonNull(person, "person must not be null");
         Optional<Person> existingPerson = personRepository.findByPhoneNumber(person.getPhoneNumber());
         if (existingPerson.isPresent()) {
@@ -52,12 +53,112 @@ public class ReservationService {
         return person;
     }
 
+    public synchronized Vehicle registerVehicle(Person person, String registrationNumber) {
+        Objects.requireNonNull(person, "person must not be null");
+        Objects.requireNonNull(registrationNumber, "registrationNumber must not be null");
+        if (registrationNumber.isBlank()) {
+            throw new IllegalArgumentException("registrationNumber must not be blank");
+        }
+        String registration = registrationNumber;
+        Person registeredPerson = personRepository.findByPhoneNumber(person.getPhoneNumber())
+                .orElseThrow(() -> new IllegalArgumentException("Person is not registered"));
+        if (!registeredPerson.equals(person)) {
+            throw new IllegalArgumentException("Person details do not match the registered person");
+        }
+
+        for (Person existingPerson : personRepository.findAll()) {
+            for (Vehicle existingVehicle : existingPerson.getVehicles()) {
+                if (existingVehicle.getRegistrationNumber().equalsIgnoreCase(registration)) {
+                    if (!existingPerson.equals(registeredPerson)) {
+                        throw new IllegalArgumentException("Vehicle registration is already registered to another person");
+                    }
+                    return existingVehicle;
+                }
+            }
+        }
+
+        Vehicle vehicle = new Vehicle(registration, registeredPerson);
+        registeredPerson.addVehicle(vehicle);
+        return vehicle;
+    }
+
+    /** Validates the complete booking request before persisting its person or vehicle. */
+    public synchronized Reservation bookReservation(
+            Person person, String registrationNumber, ParkingSpace parkingSpace, Duration plannedDuration) {
+        completeExpiredReservationsAt(LocalDateTime.now());
+        Objects.requireNonNull(person, "person must not be null");
+        Objects.requireNonNull(parkingSpace, "parkingSpace must not be null");
+        Objects.requireNonNull(plannedDuration, "plannedDuration must not be null");
+        Objects.requireNonNull(registrationNumber, "registrationNumber must not be null");
+        if (registrationNumber.isBlank()) {
+            throw new IllegalArgumentException("registrationNumber must not be blank");
+        }
+        if (plannedDuration.isZero() || plannedDuration.isNegative()) {
+            throw new IllegalArgumentException("plannedDuration must be positive");
+        }
+        if (!parkingArea.getSpaces().contains(parkingSpace)) {
+            throw new IllegalArgumentException("Parking space does not belong to this parking area");
+        }
+        if (parkingSpace.getStatus() != SpaceStatus.AVAILABLE) {
+            throw new IllegalStateException("Parking space " + parkingSpace.getSpaceId() + " is already occupied");
+        }
+
+        Person registeredPerson = personRepository.findByPhoneNumber(person.getPhoneNumber())
+                .map(existing -> {
+                    if (!existing.equals(person)) {
+                        throw new IllegalArgumentException("Phone number is already registered to another person");
+                    }
+                    return existing;
+                })
+                .orElse(person);
+
+        Vehicle registeredVehicle = null;
+        for (Person existingPerson : personRepository.findAll()) {
+            for (Vehicle existingVehicle : existingPerson.getVehicles()) {
+                if (existingVehicle.getRegistrationNumber().equalsIgnoreCase(registrationNumber)) {
+                    if (!existingPerson.equals(registeredPerson)) {
+                        throw new IllegalArgumentException(
+                                "Vehicle registration is already registered to another person");
+                    }
+                    registeredVehicle = existingVehicle;
+                    break;
+                }
+            }
+            if (registeredVehicle != null) {
+                break;
+            }
+        }
+
+        LocalDateTime startTime = LocalDateTime.now();
+        try {
+            startTime.plus(plannedDuration);
+        } catch (DateTimeException | ArithmeticException exception) {
+            throw new IllegalArgumentException("plannedDuration is too large", exception);
+        }
+
+        // All request/business validation is complete before any registration is persisted.
+        if (personRepository.findByPhoneNumber(person.getPhoneNumber()).isEmpty()) {
+            personRepository.save(registeredPerson);
+        }
+        if (registeredVehicle == null) {
+            registeredVehicle = new Vehicle(registrationNumber, registeredPerson);
+            registeredPerson.addVehicle(registeredVehicle);
+        }
+
+        Reservation reservation = new Reservation(
+                registeredPerson, registeredVehicle, parkingSpace, plannedDuration, startTime);
+        reservationRepository.save(reservation);
+        return reservation;
+    }
+
     // Create a reservation for a registered person and their vehicle.
-    public Reservation createReservation(
+    public synchronized Reservation createReservation(
             Person person,
             Vehicle vehicle,
             ParkingSpace parkingSpace,
             Duration plannedDuration) {
+
+        completeExpiredReservationsAt(LocalDateTime.now());
 
         Objects.requireNonNull(person, "person must not be null");
         Objects.requireNonNull(vehicle, "vehicle must not be null");
@@ -77,7 +178,9 @@ public class ReservationService {
         }
 
         // The vehicle must belong to the reserving person.
-        if (!vehicle.getOwner().equals(registeredPerson)) {
+        if (!vehicle.getOwner().equals(registeredPerson)
+                || registeredPerson.getVehicles().stream().noneMatch(registeredVehicle ->
+                        registeredVehicle.getRegistrationNumber().equalsIgnoreCase(vehicle.getRegistrationNumber()))) {
             throw new IllegalArgumentException(
                     "Vehicle does not belong to the registered person");
         }
@@ -119,6 +222,8 @@ public class ReservationService {
         Objects.requireNonNull(
                 actualEndTime, "actualEndTime must not be null");
 
+        completeExpiredReservationsAt(LocalDateTime.now());
+
         Reservation reservation = reservationRepository
                 .findById(reservationId)
                 .orElseThrow(() ->
@@ -147,6 +252,8 @@ public class ReservationService {
         Objects.requireNonNull(reservationId, "reservationId must not be null");
         Objects.requireNonNull(cancelledAt, "cancelledAt must not be null");
 
+        completeExpiredReservationsAt(LocalDateTime.now());
+
         Reservation reservation = reservationRepository
                 .findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
@@ -158,21 +265,34 @@ public class ReservationService {
 
     // Return all parking spaces.
     public List<ParkingSpace> getAllSpaces() {
+        completeExpiredReservationsAt(LocalDateTime.now());
         return parkingArea.getSpaces();
     }
 
     // Return only currently available spaces.
     public List<ParkingSpace> getAvailableSpaces() {
+        completeExpiredReservationsAt(LocalDateTime.now());
         return parkingArea.getAvailableSpaces();
     }
 
-    // Return all reservations, active and completed.
+    // Return reservation history, including active, completed, and cancelled reservations.
     public List<Reservation> getAllReservations() {
+        completeExpiredReservationsAt(LocalDateTime.now());
         return reservationRepository.findAll();
     }
 
     // Return only active reservations.
     public List<Reservation> getActiveReservations() {
+        completeExpiredReservationsAt(LocalDateTime.now());
         return reservationRepository.findActive();
+    }
+
+    private void completeExpiredReservationsAt(LocalDateTime now) {
+        for (Reservation reservation : reservationRepository.findActive()) {
+            if (!reservation.getExpectedEndTime().isAfter(now)) {
+                reservation.complete(reservation.getExpectedEndTime());
+                reservationRepository.save(reservation);
+            }
+        }
     }
 }

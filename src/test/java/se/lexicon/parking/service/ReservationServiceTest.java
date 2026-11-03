@@ -38,10 +38,76 @@ class ReservationServiceTest {
 
         person = new Person("Padma", "0701234567");
         vehicle = new Vehicle("ABC123", person);
+        person.addVehicle(vehicle);
         parkingSpace = store.parkingArea().getSpaces().getFirst();
 
         // Register the person before creating reservations.
         store.people().save(person);
+    }
+
+    @Test
+    void registerVehicle_shouldRetainMultipleVehiclesAndReuseExistingRegistration() {
+        Vehicle secondVehicle = reservationService.registerVehicle(person, "XYZ789");
+
+        assertEquals(2, person.getVehicles().size());
+        assertEquals(secondVehicle, reservationService.registerVehicle(person, "xyz789"));
+        assertEquals(2, person.getVehicles().size());
+        assertEquals(vehicle, reservationService.registerVehicle(person, "ABC123"));
+    }
+
+    @Test
+    void registerVehicle_shouldRejectRegistrationOwnedByAnotherPerson() {
+        Person anotherPerson = reservationService.registerPerson(
+                new Person("Another Person", "0705555555"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> reservationService.registerVehicle(anotherPerson, "ABC123"));
+        assertTrue(anotherPerson.getVehicles().isEmpty());
+    }
+
+    @Test
+    void bookReservation_shouldNotRegisterPersonWhenSpaceIsUnavailable() {
+        reservationService.createReservation(person, vehicle, parkingSpace, Duration.ofHours(1));
+        Person newPerson = new Person("New Person", "0700000000");
+        ParkingSpace otherOccupiedSpace = parkingSpace;
+
+        assertThrows(IllegalStateException.class, () -> reservationService.bookReservation(
+                newPerson, "NEW123", otherOccupiedSpace, Duration.ofHours(1)));
+
+        assertTrue(store.people().findByPhoneNumber(newPerson.getPhoneNumber()).isEmpty());
+        assertTrue(newPerson.getVehicles().isEmpty());
+        assertEquals(1, reservationService.getAllReservations().size());
+    }
+
+    @Test
+    void bookReservation_shouldNotRegisterPersonWhenDurationIsInvalid() {
+        Person newPerson = new Person("New Person", "0700000000");
+
+        assertThrows(IllegalArgumentException.class, () -> reservationService.bookReservation(
+                newPerson, "NEW123", parkingSpace, Duration.ZERO));
+
+        assertTrue(store.people().findByPhoneNumber(newPerson.getPhoneNumber()).isEmpty());
+        assertTrue(newPerson.getVehicles().isEmpty());
+        assertTrue(reservationService.getAllReservations().isEmpty());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+    }
+
+    @Test
+    void expectedEndTime_shouldCompleteReservationAndReleaseSpaceOnNextServiceQuery() {
+        LocalDateTime startTime = LocalDateTime.now().minusHours(3);
+        Reservation reservation = new Reservation(
+                person, vehicle, parkingSpace, Duration.ofHours(2), startTime);
+        store.reservations().save(reservation);
+
+        assertEquals(ReservationStatus.ACTIVE, reservation.getStatus());
+        assertEquals(SpaceStatus.OCCUPIED, parkingSpace.getStatus());
+
+        assertTrue(reservationService.getAvailableSpaces().contains(parkingSpace));
+
+        assertEquals(ReservationStatus.COMPLETED, reservation.getStatus());
+        assertEquals(reservation.getExpectedEndTime(), reservation.getActualEndTime());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
+        assertTrue(reservationService.getActiveReservations().isEmpty());
     }
 
     @Test
@@ -170,6 +236,22 @@ class ReservationServiceTest {
         Reservation nextReservation = reservationService.createReservation(
                 person, vehicle, parkingSpace, Duration.ofHours(1));
         assertEquals(ReservationStatus.ACTIVE, nextReservation.getStatus());
+    }
+
+    @Test
+    void cancelReservation_shouldRejectCompletedReservation() {
+        Reservation reservation = reservationService.createReservation(
+                person, vehicle, parkingSpace, Duration.ofHours(2));
+        LocalDateTime completedAt = reservation.getStartTime().plusMinutes(30);
+        reservationService.completeReservation(reservation.getReservationId(), completedAt);
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.cancelReservation(reservation.getReservationId()));
+
+        assertEquals(ReservationStatus.COMPLETED, reservation.getStatus());
+        assertEquals(completedAt, reservation.getActualEndTime());
+        assertNull(reservation.getCancelledAt());
+        assertEquals(SpaceStatus.AVAILABLE, parkingSpace.getStatus());
     }
 
     @Test

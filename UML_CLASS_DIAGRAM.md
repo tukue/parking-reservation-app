@@ -60,6 +60,7 @@ classDiagram
 - Each reservation belongs to exactly one person, uses exactly one vehicle, and reserves exactly one parking space. Each of those can be associated with multiple reservations over time.
 - A parking space may have no reservations or many reservations over time, but no more than one active reservation at any moment.
 - `expectedEndTime` is calculated from `startTime` plus `plannedDuration`.
-- `actualEndTime` is set when the reservation is completed. Completing a reservation changes its status to `COMPLETED` and makes its space available.
+- When the system next evaluates reservations at or after `expectedEndTime`, it completes the reservation, sets `actualEndTime` to `expectedEndTime`, and makes the space available.
+- A person may complete a reservation early; this records the actual checkout time, changes its status to `COMPLETED`, and makes its space available.
 - Cancelling an active unpaid reservation sets `cancelledAt`, changes its status to `CANCELLED`, and makes its space available. A completed or cancelled reservation cannot be cancelled again.
-- `ParkingSpace.status` is `OCCUPIED` while it has an active reservation; otherwise it is `AVAILABLE`.
+- `ParkingSpace.status` is `OCCUPIED` while it has an active reservation; it becomes `AVAILABLE` when the reservation is completed, cancelled, or processed as complete after its expected end time.

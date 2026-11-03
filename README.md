@@ -9,24 +9,28 @@ A Java application starter for managing parking reservations at the Lexicon buil
 
 ## Run locally
 
-Confirm Maven is using JDK 25:
+Run these commands in a Bash terminal from the repository root. The project targets Java 25, so both `java` and Maven must use JDK 25. Confirm the active versions:
 
 ```bash
 java -version
 mvn -version
 ```
 
-If needed, set `JAVA_HOME` to your JDK 25 installation before starting Maven. Replace `/path/to/jdk-25` with the JDK installation directory on your computer:
+If Maven is using a different Java version, set `JAVA_HOME` to your JDK 25 installation before starting it. For Git Bash on Windows, adjust this example if your JDK is installed elsewhere:
 
 ```bash
-export JAVA_HOME="/path/to/jdk-25"
+export JAVA_HOME="/c/Program Files/Java/jdk-25.0.4.1"
 export PATH="$JAVA_HOME/bin:$PATH"
+java -version
+mvn -version
 ```
+
+In WSL, use a JDK installed inside WSL rather than a Windows JDK path.
 
 Start the web application:
 
 ```bash
-mvn spring-boot:run
+mvn clean spring-boot:run
 ```
 
 Open [http://localhost:8080](http://localhost:8080) in a browser. Stop the app with `Ctrl+C`.
