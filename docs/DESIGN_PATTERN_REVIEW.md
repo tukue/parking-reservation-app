@@ -8,7 +8,7 @@ The web application separates request handling, page rendering, and domain behav
 
 - **Controller:** `ParkingController` handles page requests and booking, completion, and cancellation form submissions.
 - **View:** `src/main/resources/templates/index.html` renders parking-space availability, the booking form, and active reservations using Thymeleaf.
-- **Model/domain:** `Person`, `Vehicle`, `ParkingSpace`, and `Reservation` represent the parking concepts and their rules.
+- **Model/domain:** `Person`, `Vehicle`, `ParkingLot`, `ParkingPlace`, and `Reservation` represent the parking concepts and their rules.
 
 For example, a booking form submission is handled by the controller, which calls the service; the service returns data that the controller or view uses to show the result.
 
@@ -30,7 +30,7 @@ Spring creates and shares the application components:
 
 - `ParkingConfiguration` creates the shared in-memory store and `ReservationService` beans.
 - `ParkingController` receives `ReservationService` through its constructor.
-- The service receives the parking area and repository interfaces through its constructor.
+- The service receives the parking lot and repository interfaces through its constructor.
 
 This makes dependencies explicit and ensures requests use the same in-memory parking state.
 
@@ -38,7 +38,7 @@ This makes dependencies explicit and ensures requests use the same in-memory par
 
 The domain classes combine parking data with rules that protect valid state changes:
 
-- `ParkingSpace` starts as available and changes availability when a reservation occupies or releases it.
+- `ParkingPlace` starts as available and changes availability when a reservation occupies or releases it.
 - `Reservation` calculates its expected end time and allows completion or cancellation only while its status is `ACTIVE`.
 - `Person` retains one or more registered vehicles.
 

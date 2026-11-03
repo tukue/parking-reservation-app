@@ -291,12 +291,12 @@ class ReservationServiceTest {
     }
 
     @Test
-    void createReservation_shouldRejectSpaceFromAnotherParkingArea() {
+    void createReservation_shouldRejectPlaceFromAnotherParkingLot() {
         InMemoryParkingStore anotherStore =
                 new InMemoryParkingStore("Another Parking");
 
         ParkingPlace foreignSpace =
-                anotherStore.parkingArea().getSpaces().getFirst();
+                anotherStore.parkingLot().getParkingPlaces().getFirst();
 
         assertThrows(IllegalArgumentException.class,
                 () -> reservationService.createReservation(

@@ -185,10 +185,10 @@ public class ReservationService {
                     "Vehicle does not belong to the registered person");
         }
 
-        // The space must belong to this parking area.
+        // The place must belong to this parking lot.
         if (!parkingLot.getParkingPlaces().contains(parkingPlace)) {
             throw new IllegalArgumentException(
-                    "Parking space does not belong to this parking area");
+                    "Parking place does not belong to this parking lot");
         }
 
         // Reject occupied spaces before creating the reservation.

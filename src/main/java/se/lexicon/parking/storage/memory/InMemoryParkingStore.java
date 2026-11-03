@@ -31,9 +31,4 @@ public class InMemoryParkingStore {
         return parkingLot;
     }
 
-    /** @deprecated Use {@link #parkingLot()}. */
-    @Deprecated(forRemoval = true)
-    public ParkingLot parkingArea() {
-        return parkingLot;
-    }
 }
