@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
-import se.lexicon.parking.model.ParkingSpace;
+import se.lexicon.parking.model.ParkingPlace;
 import se.lexicon.parking.model.Person;
 import se.lexicon.parking.model.Reservation;
 import se.lexicon.parking.model.Vehicle;
@@ -39,10 +39,10 @@ class InMemoryReservationRepositoryTest {
         assertEquals(1, repository.findAll().size());
     }
 
-    private Reservation createReservation(String spaceId) {
+    private Reservation createReservation(String spotId) {
         Person person = new Person("Alex Example", "+46123456789");
         Vehicle vehicle = new Vehicle("ABC123", person);
-        return new Reservation(person, vehicle, new ParkingSpace(spaceId), Duration.ofHours(1),
+        return new Reservation(person, vehicle, new ParkingPlace(spotId), Duration.ofHours(1),
                 LocalDateTime.of(2026, 10, 29, 10, 0));
     }
 }

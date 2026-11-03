@@ -23,8 +23,8 @@
     <section class="summary-card" aria-label="Parking availability">
         <div>
             <p class="eyebrow">RIGHT NOW</p>
-            <h2><span th:text="${availableSpaces.size()}">20</span> spaces available</h2>
-            <p class="muted">of <span th:text="${spaces.size()}">20</span> total spaces</p>
+            <h2><span th:text="${availableSpaces.size()}">20</span> spots available</h2>
+            <p class="muted">of <span th:text="${spaces.size()}">20</span> total spots</p>
         </div>
         <div class="availability-meter" aria-hidden="true">
             <span th:style="|width: ${availabilityPercent}%|" class="meter-fill"></span>
@@ -36,16 +36,16 @@
             <div class="section-heading">
                 <div>
                     <p class="eyebrow">LIVE AVAILABILITY</p>
-                    <h2 id="spaces-heading">Parking spaces</h2>
+                    <h2 id="spaces-heading">Parking spots</h2>
                 </div>
                 <span class="legend"><i class="dot available-dot"></i>Available <i class="dot occupied-dot"></i>Occupied</span>
             </div>
             <div class="space-grid">
-                <div th:each="space : ${spaces}"
+                <div th:each="place : ${spaces}"
                      class="space-tile"
-                     th:classappend="${space.status.name() == 'AVAILABLE' ? ' space-available' : ' space-occupied'}">
-                    <span class="space-number" th:text="${space.spaceId}">1</span>
-                    <span class="space-status" th:text="${space.status.name() == 'AVAILABLE' ? 'Available' : 'Occupied'}">Available</span>
+                     th:classappend="${place.status.name() == 'AVAILABLE' ? ' space-available' : ' space-occupied'}">
+                    <span class="space-number" th:text="|Spot ${place.spotId}|">Spot 1</span>
+                    <span class="space-status" th:text="${place.status.name() == 'AVAILABLE' ? 'Available' : 'Occupied'}">Available</span>
                 </div>
             </div>
         </section>
@@ -65,11 +65,11 @@
 
                 <div class="form-row">
                     <div>
-                        <label for="spaceId">Available space</label>
-                        <select id="spaceId" name="spaceId" required th:disabled="${availableSpaces.isEmpty()}">
-                            <option value="" selected disabled>Select a space</option>
-                            <option th:each="space : ${availableSpaces}" th:value="${space.spaceId}"
-                                    th:text="|Space ${space.spaceId}|">Space 1</option>
+                        <label for="spotId">Available spot</label>
+                        <select id="spotId" name="spotId" required th:disabled="${availableSpaces.isEmpty()}">
+                            <option value="" selected disabled>Select a spot</option>
+                            <option th:each="place : ${availableSpaces}" th:value="${place.spotId}"
+                                    th:text="|Spot ${place.spotId}|">Spot 1</option>
                         </select>
                     </div>
                     <div>
@@ -78,7 +78,7 @@
                     </div>
                 </div>
                 <button type="submit" class="primary-button" th:disabled="${availableSpaces.isEmpty()}">Reserve parking</button>
-                <p th:if="${availableSpaces.isEmpty()}" class="muted">All spaces are currently occupied.</p>
+                <p th:if="${availableSpaces.isEmpty()}" class="muted">All spots are currently occupied.</p>
             </form>
         </section>
     </div>
@@ -94,11 +94,11 @@
         <div th:unless="${activeReservations.isEmpty()}" class="table-wrap">
             <table>
                 <thead>
-                <tr><th>Space</th><th>Vehicle</th><th>Reservation</th><th>Expected end</th><th>Actions</th></tr>
+                <tr><th>Spot</th><th>Vehicle</th><th>Reservation</th><th>Expected end</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                 <tr th:each="reservation : ${activeReservations}">
-                    <td th:text="${reservation.parkingSpace.spaceId}">1</td>
+                    <td th:text="${reservation.parkingPlace.spotId}">1</td>
                     <td th:text="${reservation.vehicle.registrationNumber}">ABC123</td>
                     <td class="reservation-id" th:text="${reservation.reservationId}">id</td>
                     <td th:text="${reservation.expectedEndTime}">2026-10-29T12:00</td>

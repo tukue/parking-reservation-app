@@ -15,6 +15,6 @@ public class ParkingConfiguration {
 
     @Bean
     ReservationService reservationService(InMemoryParkingStore store) {
-        return new ReservationService(store.parkingArea(), store.people(), store.reservations());
+        return new ReservationService(store.parkingLot(), store.people(), store.reservations());
     }
 }

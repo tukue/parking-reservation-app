@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import se.lexicon.parking.model.ParkingSpace;
+import se.lexicon.parking.model.ParkingPlace;
 import se.lexicon.parking.model.Person;
-import se.lexicon.parking.model.SpaceStatus;
+import se.lexicon.parking.model.ParkingPlaceStatus;
 import se.lexicon.parking.service.ReservationService;
 
 @Controller
@@ -26,14 +26,14 @@ public class ParkingController {
 
     @GetMapping("/")
     public String home(Model model) {
-        var spaces = reservationService.getAllSpaces();
-        var availableSpaces = reservationService.getAvailableSpaces();
-        double availabilityPercent = spaces.isEmpty()
+        var parkingPlaces = reservationService.getAllSpaces();
+        var availableParkingPlaces = reservationService.getAvailableSpaces();
+        double availabilityPercent = parkingPlaces.isEmpty()
                 ? 0.0
-                : availableSpaces.size() * 100.0 / spaces.size();
+                : availableParkingPlaces.size() * 100.0 / parkingPlaces.size();
 
-        model.addAttribute("spaces", spaces);
-        model.addAttribute("availableSpaces", availableSpaces);
+        model.addAttribute("spaces", parkingPlaces);
+        model.addAttribute("availableSpaces", availableParkingPlaces);
         model.addAttribute("availabilityPercent", availabilityPercent);
         model.addAttribute("activeReservations", reservationService.getActiveReservations());
         return "index";
@@ -44,29 +44,29 @@ public class ParkingController {
             @RequestParam String name,
             @RequestParam String phoneNumber,
             @RequestParam String registrationNumber,
-            @RequestParam(required = false) String spaceId,
+            @RequestParam(required = false) String spotId,
             @RequestParam int durationMinutes,
             RedirectAttributes redirectAttributes) {
         try {
-            if (spaceId == null || spaceId.isBlank()) {
-                throw new IllegalArgumentException("Please choose an available parking space");
+            if (spotId == null || spotId.isBlank()) {
+                throw new IllegalArgumentException("Please choose an available parking spot");
             }
             if (durationMinutes < 30 || durationMinutes % 30 != 0) {
                 throw new IllegalArgumentException(
                         "Parking duration must be at least 30 minutes and in 30-minute increments");
             }
 
-            ParkingSpace parkingSpace = reservationService.getAllSpaces().stream()
-                    .filter(space -> space.getSpaceId().equals(spaceId))
+            ParkingPlace parkingPlace = reservationService.getAllSpaces().stream()
+                    .filter(place -> place.getSpotId().equals(spotId))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Choose a valid parking space"));
-            if (parkingSpace.getStatus() != SpaceStatus.AVAILABLE) {
-                throw new IllegalStateException("Parking space " + spaceId + " is already occupied");
+                    .orElseThrow(() -> new IllegalArgumentException("Choose a valid parking spot"));
+            if (parkingPlace.getStatus() != ParkingPlaceStatus.AVAILABLE) {
+                throw new IllegalStateException("Parking spot " + spotId + " is already occupied");
             }
 
             var reservation = reservationService.bookReservation(
                     new Person(name, phoneNumber), registrationNumber,
-                    parkingSpace, Duration.ofMinutes(durationMinutes));
+                    parkingPlace, Duration.ofMinutes(durationMinutes));
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Reservation " + reservation.getReservationId() + " created. Expected end: "
@@ -83,7 +83,7 @@ public class ParkingController {
             RedirectAttributes redirectAttributes) {
         try {
             reservationService.completeReservation(reservationId);
-            redirectAttributes.addFlashAttribute("successMessage", "Reservation completed. The space is available again.");
+            redirectAttributes.addFlashAttribute("successMessage", "Reservation completed. The parking place is available again.");
         } catch (IllegalArgumentException | IllegalStateException exception) {
             redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
         }
@@ -97,7 +97,7 @@ public class ParkingController {
         try {
             reservationService.cancelReservation(reservationId);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Reservation cancelled. The space is available again.");
+                    "Reservation cancelled. The parking place is available again.");
         } catch (IllegalArgumentException | IllegalStateException exception) {
             redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
         }

@@ -9,29 +9,29 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import se.lexicon.parking.model.ParkingArea;
-import se.lexicon.parking.model.ParkingSpace;
+import se.lexicon.parking.model.ParkingLot;
+import se.lexicon.parking.model.ParkingPlace;
 import se.lexicon.parking.model.Person;
 import se.lexicon.parking.model.Reservation;
 import se.lexicon.parking.model.ReservationStatus;
-import se.lexicon.parking.model.SpaceStatus;
+import se.lexicon.parking.model.ParkingPlaceStatus;
 import se.lexicon.parking.model.Vehicle;
 import se.lexicon.parking.storage.PersonRepository;
 import se.lexicon.parking.storage.ReservationRepository;
 
 public class ReservationService {
 
-    private final ParkingArea parkingArea;
+    private final ParkingLot parkingLot;
     private final PersonRepository personRepository;
     private final ReservationRepository reservationRepository;
 
     public ReservationService(
-            ParkingArea parkingArea,
+            ParkingLot parkingLot,
             PersonRepository personRepository,
             ReservationRepository reservationRepository) {
 
-        this.parkingArea = Objects.requireNonNull(
-                parkingArea, "parkingArea must not be null");
+        this.parkingLot = Objects.requireNonNull(
+                parkingLot, "parkingLot must not be null");
 
         this.personRepository = Objects.requireNonNull(
                 personRepository, "personRepository must not be null");
@@ -84,10 +84,10 @@ public class ReservationService {
 
     /** Validates the complete booking request before persisting its person or vehicle. */
     public synchronized Reservation bookReservation(
-            Person person, String registrationNumber, ParkingSpace parkingSpace, Duration plannedDuration) {
+            Person person, String registrationNumber, ParkingPlace parkingPlace, Duration plannedDuration) {
         completeExpiredReservationsAt(LocalDateTime.now());
         Objects.requireNonNull(person, "person must not be null");
-        Objects.requireNonNull(parkingSpace, "parkingSpace must not be null");
+        Objects.requireNonNull(parkingPlace, "parkingPlace must not be null");
         Objects.requireNonNull(plannedDuration, "plannedDuration must not be null");
         Objects.requireNonNull(registrationNumber, "registrationNumber must not be null");
         if (registrationNumber.isBlank()) {
@@ -96,11 +96,11 @@ public class ReservationService {
         if (plannedDuration.isZero() || plannedDuration.isNegative()) {
             throw new IllegalArgumentException("plannedDuration must be positive");
         }
-        if (!parkingArea.getSpaces().contains(parkingSpace)) {
-            throw new IllegalArgumentException("Parking space does not belong to this parking area");
+        if (!parkingLot.getParkingPlaces().contains(parkingPlace)) {
+            throw new IllegalArgumentException("Parking place does not belong to this parking lot");
         }
-        if (parkingSpace.getStatus() != SpaceStatus.AVAILABLE) {
-            throw new IllegalStateException("Parking space " + parkingSpace.getSpaceId() + " is already occupied");
+        if (parkingPlace.getStatus() != ParkingPlaceStatus.AVAILABLE) {
+            throw new IllegalStateException("Parking spot " + parkingPlace.getSpotId() + " is already occupied");
         }
 
         Person registeredPerson = personRepository.findByPhoneNumber(person.getPhoneNumber())
@@ -146,7 +146,7 @@ public class ReservationService {
         }
 
         Reservation reservation = new Reservation(
-                registeredPerson, registeredVehicle, parkingSpace, plannedDuration, startTime);
+                registeredPerson, registeredVehicle, parkingPlace, plannedDuration, startTime);
         reservationRepository.save(reservation);
         return reservation;
     }
@@ -155,14 +155,14 @@ public class ReservationService {
     public synchronized Reservation createReservation(
             Person person,
             Vehicle vehicle,
-            ParkingSpace parkingSpace,
+            ParkingPlace parkingPlace,
             Duration plannedDuration) {
 
         completeExpiredReservationsAt(LocalDateTime.now());
 
         Objects.requireNonNull(person, "person must not be null");
         Objects.requireNonNull(vehicle, "vehicle must not be null");
-        Objects.requireNonNull(parkingSpace, "parkingSpace must not be null");
+        Objects.requireNonNull(parkingPlace, "parkingPlace must not be null");
         Objects.requireNonNull(plannedDuration, "plannedDuration must not be null");
 
         // The person must already be registered.
@@ -186,21 +186,21 @@ public class ReservationService {
         }
 
         // The space must belong to this parking area.
-        if (!parkingArea.getSpaces().contains(parkingSpace)) {
+        if (!parkingLot.getParkingPlaces().contains(parkingPlace)) {
             throw new IllegalArgumentException(
                     "Parking space does not belong to this parking area");
         }
 
         // Reject occupied spaces before creating the reservation.
-        if (parkingSpace.getStatus() != SpaceStatus.AVAILABLE) {
+        if (parkingPlace.getStatus() != ParkingPlaceStatus.AVAILABLE) {
             throw new IllegalStateException(
-                    "Parking space " + parkingSpace.getSpaceId()
+                    "Parking spot " + parkingPlace.getSpotId()
                             + " is already occupied");
         }
 
         // Reservation validates duration and occupies the space.
         Reservation reservation = new Reservation(
-                registeredPerson, vehicle, parkingSpace, plannedDuration);
+                registeredPerson, vehicle, parkingPlace, plannedDuration);
 
         reservationRepository.save(reservation);
 
@@ -264,15 +264,27 @@ public class ReservationService {
     }
 
     // Return all parking spaces.
-    public List<ParkingSpace> getAllSpaces() {
+    public List<ParkingPlace> getAllParkingPlaces() {
         completeExpiredReservationsAt(LocalDateTime.now());
-        return parkingArea.getSpaces();
+        return parkingLot.getParkingPlaces();
     }
 
     // Return only currently available spaces.
-    public List<ParkingSpace> getAvailableSpaces() {
+    public List<ParkingPlace> getAvailableParkingPlaces() {
         completeExpiredReservationsAt(LocalDateTime.now());
-        return parkingArea.getAvailableSpaces();
+        return parkingLot.getAvailableParkingPlaces();
+    }
+
+    /** @deprecated Use {@link #getAllParkingPlaces()}. */
+    @Deprecated(forRemoval = true)
+    public List<ParkingPlace> getAllSpaces() {
+        return getAllParkingPlaces();
+    }
+
+    /** @deprecated Use {@link #getAvailableParkingPlaces()}. */
+    @Deprecated(forRemoval = true)
+    public List<ParkingPlace> getAvailableSpaces() {
+        return getAvailableParkingPlaces();
     }
 
     // Return reservation history, including active, completed, and cancelled reservations.
