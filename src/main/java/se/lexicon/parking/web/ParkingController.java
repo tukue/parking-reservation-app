@@ -3,12 +3,14 @@ package se.lexicon.parking.web;
 import java.time.Duration;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import se.lexicon.parking.model.ParkingPlace;
@@ -41,38 +43,40 @@ public class ParkingController {
 
     @PostMapping("/reservations")
     public String createReservation(
-            @RequestParam String name,
-            @RequestParam String phoneNumber,
-            @RequestParam String registrationNumber,
-            @RequestParam(required = false) String spotId,
-            @RequestParam int durationMinutes,
+            @Valid @ModelAttribute("reservationForm") ReservationForm form,
+            BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getAllErrors().getFirst().getDefaultMessage();
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
+            redirectAttributes.addFlashAttribute("reservationForm", form);
+            return "redirect:/";
+        }
+
         try {
-            if (spotId == null || spotId.isBlank()) {
-                throw new IllegalArgumentException("Please choose an available parking spot");
-            }
-            if (durationMinutes < 30 || durationMinutes % 30 != 0) {
+            if (form.getDurationMinutes() % 30 != 0) {
                 throw new IllegalArgumentException(
                         "Parking duration must be at least 30 minutes and in 30-minute increments");
             }
 
             ParkingPlace parkingPlace = reservationService.getAllSpaces().stream()
-                    .filter(place -> place.getSpotId().equals(spotId))
+                    .filter(place -> place.getSpotId().equals(form.getSpotId()))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Choose a valid parking spot"));
             if (parkingPlace.getStatus() != ParkingPlaceStatus.AVAILABLE) {
-                throw new IllegalStateException("Parking spot " + spotId + " is already occupied");
+                throw new IllegalStateException("Parking spot " + form.getSpotId() + " is already occupied");
             }
 
             var reservation = reservationService.bookReservation(
-                    new Person(name, phoneNumber), registrationNumber,
-                    parkingPlace, Duration.ofMinutes(durationMinutes));
+                    new Person(form.getName(), form.getPhoneNumber()), form.getRegistrationNumber(),
+                    parkingPlace, Duration.ofMinutes(form.getDurationMinutes()));
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Reservation " + reservation.getReservationId() + " created. Expected end: "
                             + reservation.getExpectedEndTime());
         } catch (IllegalArgumentException | IllegalStateException exception) {
             redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+            redirectAttributes.addFlashAttribute("reservationForm", form);
         }
         return "redirect:/";
     }

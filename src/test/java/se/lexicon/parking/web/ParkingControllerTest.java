@@ -195,6 +195,35 @@ class ParkingControllerTest {
     }
 
     @Test
+    void invalidCustomerFieldsAreRejectedBeforeCallingReservationService() throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", " ")
+                        .param("phoneNumber", "+46123456789")
+                        .param("registrationNumber", "ABC123")
+                        .param("spotId", "1")
+                        .param("durationMinutes", "60"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Enter your full name."))
+                .andExpect(flash().attributeExists("reservationForm"));
+
+        verifyNoInteractions(reservationService);
+    }
+
+    @Test
+    void invalidPhoneNumberIsRejectedBeforeCallingReservationService() throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", "Alex Example")
+                        .param("phoneNumber", "not-a-phone")
+                        .param("registrationNumber", "ABC123")
+                        .param("spotId", "1")
+                        .param("durationMinutes", "60"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Enter a valid phone number."));
+
+        verifyNoInteractions(reservationService);
+    }
+
+    @Test
     void completionFormCompletesTheReservation() throws Exception {
         UUID reservationId = UUID.randomUUID();
 
