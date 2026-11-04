@@ -1,15 +1,20 @@
 package se.lexicon.parking.web;
 
 import java.time.Duration;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -20,6 +25,9 @@ import se.lexicon.parking.service.ReservationService;
 
 @Controller
 public class ParkingController {
+    private static final List<String> VALIDATION_FIELD_ORDER = List.of(
+            "name", "phoneNumber", "registrationNumber", "spotId", "durationMinutes");
+
     private final ReservationService reservationService;
 
     public ParkingController(ReservationService reservationService) {
@@ -47,16 +55,30 @@ public class ParkingController {
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getAllErrors().getFirst().getDefaultMessage();
+            String errorMessage = bindingResult.getFieldErrors().stream()
+                    .sorted(Comparator
+                            .comparingInt((FieldError error) -> {
+                                int order = VALIDATION_FIELD_ORDER.indexOf(error.getField());
+                                return order < 0 ? Integer.MAX_VALUE : order;
+                            })
+                            .thenComparing(FieldError::getDefaultMessage,
+                                    Comparator.nullsLast(Comparator.naturalOrder())))
+                    .map(FieldError::getDefaultMessage)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.joining(" "));
+            if (errorMessage.isBlank()) {
+                errorMessage = "Please correct the booking details and try again.";
+            }
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             redirectAttributes.addFlashAttribute("reservationForm", form);
             return "redirect:/";
         }
 
         try {
-            if (form.getDurationMinutes() % 30 != 0) {
-                throw new IllegalArgumentException(
-                        "Parking duration must be at least 30 minutes and in 30-minute increments");
+            if (form.getDurationMinutes() < ReservationForm.MIN_DURATION_MINUTES
+                    || form.getDurationMinutes() % ReservationForm.DURATION_INCREMENT_MINUTES != 0) {
+                throw new IllegalArgumentException(ReservationForm.INVALID_DURATION_MESSAGE);
             }
 
             ParkingPlace parkingPlace = reservationService.getAllSpaces().stream()

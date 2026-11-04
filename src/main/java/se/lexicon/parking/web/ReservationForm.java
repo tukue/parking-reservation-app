@@ -7,6 +7,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class ReservationForm {
+    public static final int MIN_DURATION_MINUTES = 30;
+    public static final int DURATION_INCREMENT_MINUTES = 30;
+    public static final String INVALID_DURATION_MESSAGE =
+            "Parking duration must be at least 30 minutes and in 30-minute increments.";
+
     @NotBlank(message = "Enter your full name.")
     @Size(max = 100, message = "Name must be 100 characters or fewer.")
     private String name;
@@ -26,7 +31,7 @@ public class ReservationForm {
     private String spotId;
 
     @NotNull(message = "Enter a parking duration.")
-    @Min(value = 30, message = "Parking duration must be at least 30 minutes.")
+    @Min(value = MIN_DURATION_MINUTES, message = INVALID_DURATION_MESSAGE)
     private Integer durationMinutes;
 
     public String getName() {
