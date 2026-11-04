@@ -55,13 +55,16 @@
             <h2 id="booking-heading">Make a reservation</h2>
             <form method="post" th:action="@{/reservations}" class="booking-form">
                 <label for="name">Full name</label>
-                <input id="name" name="name" autocomplete="name" required maxlength="100" placeholder="Your name">
+                <input id="name" name="name" autocomplete="name" required maxlength="100" placeholder="Your name"
+                       th:value="${reservationForm != null ? reservationForm.name : ''}">
 
                 <label for="phoneNumber">Phone number</label>
-                <input id="phoneNumber" name="phoneNumber" type="tel" autocomplete="tel" required maxlength="30" placeholder="Your phone number">
+                <input id="phoneNumber" name="phoneNumber" type="tel" autocomplete="tel" required maxlength="30" placeholder="Your phone number"
+                       th:value="${reservationForm != null ? reservationForm.phoneNumber : ''}">
 
                 <label for="registrationNumber">Vehicle registration</label>
-                <input id="registrationNumber" name="registrationNumber" required maxlength="20" placeholder="ABC 123">
+                <input id="registrationNumber" name="registrationNumber" required maxlength="20" placeholder="ABC 123"
+                       th:value="${reservationForm != null ? reservationForm.registrationNumber : ''}">
 
                 <div class="form-row">
                     <div>
@@ -69,12 +72,15 @@
                         <select id="spotId" name="spotId" required th:disabled="${availableSpaces.isEmpty()}">
                             <option value="" selected disabled>Select a spot</option>
                             <option th:each="place : ${availableSpaces}" th:value="${place.spotId}"
+                                    th:selected="${reservationForm != null and reservationForm.spotId == place.spotId}"
                                     th:text="|Spot ${place.spotId}|">Spot 1</option>
                         </select>
                     </div>
                     <div>
                         <label for="durationMinutes">Duration (minutes)</label>
-                        <input id="durationMinutes" name="durationMinutes" type="number" min="30" step="30" value="60" required>
+                        <input id="durationMinutes" name="durationMinutes" type="number" min="30" step="30"
+                               th:value="${reservationForm != null and reservationForm.durationMinutes != null ? reservationForm.durationMinutes : 60}"
+                               required>
                     </div>
                 </div>
                 <button type="submit" class="primary-button" th:disabled="${availableSpaces.isEmpty()}">Reserve parking</button>

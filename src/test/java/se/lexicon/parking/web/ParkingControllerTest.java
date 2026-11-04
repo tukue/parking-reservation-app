@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -190,6 +192,66 @@ class ParkingControllerTest {
                         .param("durationMinutes", "60"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", "Please choose an available parking spot"));
+
+        verifyNoInteractions(reservationService);
+    }
+
+    @Test
+    void invalidCustomerFieldsAreRejectedBeforeCallingReservationService() throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", " ")
+                        .param("phoneNumber", "+46123456789")
+                        .param("registrationNumber", "ABC123")
+                        .param("spotId", "1")
+                        .param("durationMinutes", "60"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Enter your full name."))
+                .andExpect(flash().attributeExists("reservationForm"));
+
+        verifyNoInteractions(reservationService);
+    }
+
+    @Test
+    void invalidPhoneNumberIsRejectedBeforeCallingReservationService() throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", "Alex Example")
+                        .param("phoneNumber", "not-a-phone")
+                        .param("registrationNumber", "ABC123")
+                        .param("spotId", "1")
+                        .param("durationMinutes", "60"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Enter a valid phone number."));
+
+        verifyNoInteractions(reservationService);
+    }
+
+    @Test
+    void multipleValidationErrorsAreShownInStableFormOrder() throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", " ")
+                        .param("phoneNumber", "not-a-phone")
+                        .param("registrationNumber", "ABC123")
+                        .param("spotId", "1")
+                        .param("durationMinutes", "60"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage",
+                        "Enter your full name. Enter a valid phone number."));
+
+        verifyNoInteractions(reservationService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 45})
+    void invalidDurationIsRejectedWithConsistentMessage(int durationMinutes) throws Exception {
+        mockMvc.perform(post("/reservations")
+                        .param("name", "Alex Example")
+                        .param("phoneNumber", "+46123456789")
+                        .param("registrationNumber", "ABC123")
+                        .param("spotId", "1")
+                        .param("durationMinutes", Integer.toString(durationMinutes)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute(
+                        "errorMessage", ReservationForm.INVALID_DURATION_MESSAGE));
 
         verifyNoInteractions(reservationService);
     }
