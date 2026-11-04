@@ -27,7 +27,7 @@ public class ReservationForm {
     private String registrationNumber;
 
     @NotBlank(message = "Please choose an available parking spot")
-    @Pattern(regexp = "^[1-9][0-9]*$", message = "Choose a valid parking spot.")
+    @Pattern(regexp = "^(?:\\s*|[1-9][0-9]*)$", message = "Choose a valid parking spot.")
     private String spotId;
 
     @NotNull(message = "Enter a parking duration.")
